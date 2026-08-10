@@ -27,7 +27,16 @@ int main(int argc, char* argv[])
 			QTimer::singleShot(1000, [&]() {
 
 				if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
+				{
+					QTimer::singleShot(28800000, [&]()  //28800000
+						{
+						counterHost = 0;
+						qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+						test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+						});
+
 					return 0;
+				}
 				else
 				{
 					qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
@@ -38,7 +47,16 @@ int main(int argc, char* argv[])
 			});
 
 		if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
+		{
+			QTimer::singleShot(28800000, [&]() //28800000
+				{
+					counterHost = 0;
+					qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+					test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+				});
+
 			return 0;
+		}
 		else
 		{
 			qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/'  + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
