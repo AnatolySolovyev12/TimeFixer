@@ -18,11 +18,11 @@ public:
 
 	~TcpClient();
 
-	void connectToServer(const QString& host, quint16 port);
+	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
 	QString returnResultString();
 	void setResultString(QString any);
-	void startToConnect(QString any, QString port = "8888");
+	void startConnectToHost(QString any, QString port);
 	void resetAnswerString();
 	void setKey(int64_t any);
 	const int64_t getKey();
@@ -32,11 +32,15 @@ public:
 	quint16 crc16Kermit(const QByteArray& data);
 
 	void changeTimeArt();
-	QByteArray modbusCRCforArt();
+	QByteArray modbusCRCforArtTime(QString temp);
+	QByteArray modbusCRCforArtDate(QString temp);
+	void stopConnectionWithHost();
+
 
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
+	void stopConnection();
 
 private slots:
 	void onConnected();
@@ -51,7 +55,8 @@ private:
 	QTimer* myTimer;
 	int counterForResend = 0;
 	QString answerString;
-	QString ip = "";
+	QString m_ip = "";
+	QString m_port = "";
 	int reTransmitQuery = 0;
 	QString serialStringForProtocol;
 	int64_t key = 0;

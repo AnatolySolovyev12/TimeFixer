@@ -1,6 +1,6 @@
 ﻿#include "TcpClient.h"
 
-TcpClient::TcpClient(QString any, QObject * parent) : serialStringForProtocol(any), QObject(parent), socket(new QTcpSocket(this))
+TcpClient::TcpClient(QString any, QObject* parent) : serialStringForProtocol(any), QObject(parent), socket(new QTcpSocket(this))
 {
 	AttachConsole(ATTACH_PARENT_PROCESS);
 
@@ -9,6 +9,7 @@ TcpClient::TcpClient(QString any, QObject * parent) : serialStringForProtocol(an
 	connect(socket, &QTcpSocket::disconnected, this, &TcpClient::onDisconnected);
 	connect(socket, &QTcpSocket::readyRead, this, &TcpClient::onReadyRead);
 	connect(socket, &QTcpSocket::errorOccurred, this, &TcpClient::onErrorOccurred);
+	connect(this, &TcpClient::stopConnection, this, &TcpClient::stopConnectionWithHost);
 }
 
 TcpClient::~TcpClient()
@@ -18,10 +19,10 @@ TcpClient::~TcpClient()
 	}
 }
 
-void TcpClient::connectToServer(const QString& host, quint16 port)
+void TcpClient::connectToSavedHost()
 {
-	socket->connectToHost(QHostAddress(host), port);
-	qDebug() << "Connect to " + QHostAddress(host).toString() << ':' << port;
+	socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
 }
 
 void TcpClient::sendMessage(const QByteArray& message)
@@ -29,42 +30,18 @@ void TcpClient::sendMessage(const QByteArray& message)
 	if (socket->state() == QTcpSocket::ConnectedState) {
 
 		socket->write(message);
-		qDebug() << "TX >> " << message.toHex();
+		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX >> " << message.toHex();
 	}
 	else {
-		qDebug() << "\nNot connected to server.";
+		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Not connected to server.";
 	}
 }
 
 void TcpClient::onConnected()
 {
-	// connectedState = true;
-	qDebug() << "\nConnected to server\n";
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to server\n";
 
 	changeTimeArt();
-
-	/*
-	if (serialStringForProtocol.contains('%'))
-	{
-		answerString = "Connected is done";
-		socket->close();
-		emit messageReceived(getKey());
-		return;
-	}
-
-	if (serialStringForProtocol == "*101" || serialStringForProtocol == "*102" || serialStringForProtocol == "*103" || serialStringForProtocol == "*104" || serialStringForProtocol == "*106" || serialStringForProtocol == "*109")
-	{
-		vecExchange();
-	}
-	else if (serialStringForProtocol == "]101" || serialStringForProtocol == "]102" || serialStringForProtocol == "]103" || serialStringForProtocol == "]104" || serialStringForProtocol == "]106" || serialStringForProtocol == "]109")
-	{
-		getDaily();
-	}
-	else
-	{
-		exchange();
-	}
-	*/
 }
 
 void TcpClient::onDisconnected()
@@ -86,10 +63,12 @@ void TcpClient::onReadyRead()
 
 void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
-	qDebug() << "\nSocket error:" << socketError << socket->errorString();
-	answerString += socket->errorString() + '.' + " No connection or bad signal";
-	emit messageError();
-	emit messageReceived(getKey());
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "\nSocket error:" << socketError << socket->errorString();
+}
+
+void TcpClient::stopConnectionWithHost()
+{
+	socket->close();
 }
 
 QString TcpClient::returnResultString()
@@ -102,10 +81,11 @@ void TcpClient::setResultString(QString any)
 	answerString += any + "\n\n";
 }
 
-void TcpClient::startToConnect(QString any, QString port)
+void TcpClient::startConnectToHost(QString any, QString port)
 {
-	ip = any;
-	connectToServer(ip, port.toInt());
+	m_ip = any;
+	m_port = port;
+	connectToSavedHost();
 }
 
 void TcpClient::resetAnswerString()
@@ -115,11 +95,37 @@ void TcpClient::resetAnswerString()
 
 
 
-QByteArray TcpClient::modbusCRCforArt()
+QByteArray TcpClient::modbusCRCforArtTime(QString temp)
 {
-	QString time = QTime::currentTime().toString("HHmmss");
+	QByteArray command = "@00000C" + temp.toLatin1();
 
-	QByteArray command = "@00000C" + time.toLatin1();
+	quint32 sum = 0;
+
+	for (char byte : command) {
+		sum += static_cast<unsigned char>(byte);
+	}
+
+	quint8 checksum = static_cast<quint8>(sum & 0xFF);
+
+	QByteArray checksumAscii =
+		QString("%1")
+		.arg(checksum, 2, 16, QChar('0'))
+		.toUpper()
+		.toLatin1();
+
+	QByteArray frame = command + checksumAscii + '\r';
+
+	qDebug() << frame;
+	qDebug() << frame.toHex(' ');
+
+	return frame;
+}
+
+
+
+QByteArray TcpClient::modbusCRCforArtDate(QString temp)
+{
+	QByteArray command = "@00000D1" + temp.toLatin1();
 
 	quint32 sum = 0;
 
@@ -147,34 +153,34 @@ QByteArray TcpClient::modbusCRCforArt()
 
 void TcpClient::changeTimeArt()
 {
-	if (counterForResend != 1)
-	{
-		QTimer::singleShot(500, [this]() {
+	++counterForResend;
 
-			if (counterForResend == 0) // daily
+	QTimer::singleShot(500, [this]() {
+
+		sendMessage(QByteArray(modbusCRCforArtTime(QTime::currentTime().toString("HHmmss"))));
+
+		QTimer::singleShot(4000, [this]() {
+
+			if (socket->isOpen() && socket->isValid())
+				sendMessage(QByteArray(modbusCRCforArtDate(QDate::currentDate().toString("ddMMyy"))));
+			else
 			{
-				sendMessage(QByteArray(modbusCRCforArt()));
+				qDebug() << "Socket not open!";
+				connectToSavedHost();
 			}
 
-			if (reTransmitQuery >= 4)
+			if (counterForResend < 3)
+				QTimer::singleShot(5000, [this]() {
+				changeTimeArt();
+					});
+			else
 			{
-				counterForResend = 1;
-				answerString += "No or stopped responses from remote socket.";
+				counterForResend = 0;
+				emit stopConnection();
 			}
 
-			myTimer->start(20000);
 			});
-	}
-	else
-	{
-		myTimer->stop();
-		socket->close();
-		qDebug() << '\n' << answerString;
-		ip = "";
-		reTransmitQuery = 0;
-
-		emit messageReceived(getKey());
-	}
+		});
 }
 
 
