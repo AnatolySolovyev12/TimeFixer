@@ -3,11 +3,7 @@
 #include <qdatetime.h>
 #include <QFile>
 
-
-
 bool readHostsFile(QList <QPair<QString, QString>>& temp);
-
-
 
 int main(int argc, char* argv[])
 {
@@ -28,7 +24,7 @@ int main(int argc, char* argv[])
 
 				if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
 				{
-					QTimer::singleShot(28800000, [&]()  //28800000
+					QTimer::singleShot(28800000, [&]()  //28800000 - 8 часов
 						{
 						counterHost = 0;
 						qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
@@ -48,7 +44,7 @@ int main(int argc, char* argv[])
 
 		if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
 		{
-			QTimer::singleShot(28800000, [&]() //28800000
+			QTimer::singleShot(28800000, [&]() //28800000 - 8 часов
 				{
 					counterHost = 0;
 					qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
@@ -86,7 +82,6 @@ bool readHostsFile(QList <QPair<QString, QString>>& temp)
 	QString port;
 	QString* myLine = new QString();
 
-
 	while (out.readLineInto(myLine, 0))
 	{
 		for (auto& val : *myLine)
@@ -113,10 +108,12 @@ bool readHostsFile(QList <QPair<QString, QString>>& temp)
 		portBool = false;
 	}
 
+	delete myLine;
+	myLine = nullptr;
+
 	file.close();
 
 	qDebug() << temp;
-
 	qDebug() << "Count of Hosts = " << temp.length();
 
 	return true;
