@@ -41,6 +41,7 @@ signals:
 	void messageReceived(const int64_t&);
 	void messageError();
 	void stopConnection();
+	void finish();
 
 private slots:
 	void onConnected();

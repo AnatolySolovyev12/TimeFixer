@@ -22,7 +22,7 @@ TcpClient::~TcpClient()
 void TcpClient::connectToSavedHost()
 {
 	socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
-	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
 }
 
 void TcpClient::sendMessage(const QByteArray& message)
@@ -33,21 +33,21 @@ void TcpClient::sendMessage(const QByteArray& message)
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX >> " << message.toHex();
 	}
 	else {
-		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Not connected to server.";
+		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Not connected to host.";
 	}
 }
 
 void TcpClient::onConnected()
 {
-	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to server\n";
-
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to host: " << QHostAddress(m_ip).toString();
+	connectedState = true;
 	changeTimeArt();
 }
 
 void TcpClient::onDisconnected()
 {
 	connectedState = false;
-	qDebug() << "\nDisconnected from server.\n";
+	qDebug() << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Disconnected from host.\n";
 }
 
 void TcpClient::onReadyRead()
@@ -63,12 +63,19 @@ void TcpClient::onReadyRead()
 
 void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
-	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "\nSocket error:" << socketError << socket->errorString();
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString();
+
+	if (socket->errorString().contains("Connection timed out"))
+	{
+		counterForResend = 0;
+		emit finish();
+	}
 }
 
 void TcpClient::stopConnectionWithHost()
 {
 	socket->close();
+	qDebug() <<  '\n' << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try disconnect from host " << QHostAddress(m_ip).toString() << "\n";
 }
 
 QString TcpClient::returnResultString()
@@ -115,8 +122,8 @@ QByteArray TcpClient::modbusCRCforArtTime(QString temp)
 
 	QByteArray frame = command + checksumAscii + '\r';
 
-	qDebug() << frame;
-	qDebug() << frame.toHex(' ');
+	//qDebug() << frame;
+	//qDebug() << frame.toHex(' ');
 
 	return frame;
 }
@@ -143,8 +150,8 @@ QByteArray TcpClient::modbusCRCforArtDate(QString temp)
 
 	QByteArray frame = command + checksumAscii + '\r';
 
-	qDebug() << frame;
-	qDebug() << frame.toHex(' ');
+	//qDebug() << frame;
+	//qDebug() << frame.toHex(' ');
 
 	return frame;
 }
@@ -153,15 +160,30 @@ QByteArray TcpClient::modbusCRCforArtDate(QString temp)
 
 void TcpClient::changeTimeArt()
 {
-	++counterForResend;
+	if (counterForResend++ >= 3)
+	{
+		counterForResend = 0;
+		emit stopConnection();
+		emit finish();
+
+		return;
+	}
 
 	QTimer::singleShot(500, [this]() {
 
-		sendMessage(QByteArray(modbusCRCforArtTime(QTime::currentTime().toString("HHmmss"))));
+		if (socket->isOpen() && socket->isValid() && connectedState)
+			sendMessage(QByteArray(modbusCRCforArtTime(QTime::currentTime().toString("HHmmss"))));
+		else
+		{
+			qDebug() << "Socket not open!";
+			connectToSavedHost();
+
+			return;
+		}
 
 		QTimer::singleShot(4000, [this]() {
 
-			if (socket->isOpen() && socket->isValid())
+			if (socket->isOpen() && socket->isValid() && connectedState)
 				sendMessage(QByteArray(modbusCRCforArtDate(QDate::currentDate().toString("ddMMyy"))));
 			else
 			{
@@ -177,6 +199,7 @@ void TcpClient::changeTimeArt()
 			{
 				counterForResend = 0;
 				emit stopConnection();
+				emit finish();
 			}
 
 			});

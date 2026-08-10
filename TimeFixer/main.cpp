@@ -1,14 +1,105 @@
 #include <QtCore/QCoreApplication>
-
 #include "TcpClient.h"
 #include <qdatetime.h>
+#include <QFile>
 
-int main(int argc, char *argv[])
+
+
+bool readHostsFile(QList <QPair<QString, QString>>& temp);
+
+
+
+int main(int argc, char* argv[])
 {
-    QCoreApplication app(argc, argv);
+	QCoreApplication app(argc, argv);
 
-    TcpClient test("test");
-    test.startConnectToHost("10.0.5.136", "40001");
+	QList <QPair<QString, QString>>hostArr;
+	int counterHost = 0;
 
-    return app.exec();
+	if (readHostsFile(hostArr))
+	{
+		TcpClient* test = new TcpClient("test");
+
+		QObject::connect(test, &TcpClient::finish, [&]() {
+
+			++counterHost;
+
+			QTimer::singleShot(1000, [&]() {
+
+				if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
+					return 0;
+				else
+				{
+					qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+					test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+				}
+				});
+
+			});
+
+		if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
+			return 0;
+		else
+		{
+			qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/'  + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+			test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+		}
+	}
+
+	return app.exec();
+}
+
+
+
+bool readHostsFile(QList <QPair<QString, QString>>& temp)
+{
+	QFile file(QCoreApplication::applicationDirPath() + "\\hosts.txt");
+
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		qDebug() << "Don't find hosts file. Create file and try again";
+		return false;
+	}
+
+	QTextStream out(&file);
+
+	bool portBool = false;
+	QString ip;
+	QString port;
+	QString* myLine = new QString();
+
+
+	while (out.readLineInto(myLine, 0))
+	{
+		for (auto& val : *myLine)
+		{
+			if (val.isSpace())
+			{
+				portBool = true;
+				continue;
+			}
+
+			if (!portBool)
+			{
+				ip += val;
+			}
+			else
+			{
+				port += val;
+			}
+		}
+
+		temp.push_back(qMakePair(ip, port));
+		ip.clear();
+		port.clear();
+		portBool = false;
+	}
+
+	file.close();
+
+	qDebug() << temp;
+
+	qDebug() << "Count of Hosts = " << temp.length();
+
+	return true;
 }
