@@ -21,8 +21,13 @@ TcpClient::~TcpClient()
 
 void TcpClient::connectToSavedHost()
 {
-	socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
-	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
+	if (!socket->isOpen() && !socket->isValid() && !connectedState)
+	{
+		socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
+		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
+	}
+	else
+		onConnected();
 }
 
 void TcpClient::sendMessage(const QByteArray& message)
@@ -65,7 +70,7 @@ void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString();
 
-	if (socket->errorString().contains("Connection timed out"))
+	if (socket->errorString().contains("Connection timed out") || socket->errorString().contains("Connection refused"))
 	{
 		counterForResend = 0;
 		emit finish();
