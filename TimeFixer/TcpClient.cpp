@@ -46,7 +46,8 @@ void TcpClient::onConnected()
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to host: " << QHostAddress(m_ip).toString();
 	connectedState = true;
-	changeTimeArt();
+	//changeTimeArt();
+	changeTimeM2M();
 }
 
 void TcpClient::onDisconnected()
@@ -61,9 +62,22 @@ void TcpClient::onReadyRead()
 
 	qDebug() << "RX << " << data.toHex();
 
+	/*
+	if (data.toHex().length() > 68 && counterForResend >= 2)
+	{
+		qDebug() << "\nincorrect RX. Resend";
+		reTransmitQuery++;
+		myTimer->stop();
+		changeTimeM2M();
+		return;
+	}
+	*/
+
 	myTimer->stop();
 	counterForResend++;
 	reTransmitQuery = 0;
+
+	changeTimeM2M();
 }
 
 void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
@@ -315,4 +329,74 @@ quint16 TcpClient::crc16Kermit(const QByteArray& data) // расчёт конт�
 	// Инверсия (xor_out)
 	crc ^= xor_out;
 	return crc;
+}
+
+
+void TcpClient::changeTimeM2M()
+{
+	/*
+     -900	-58 966 807	    FC7C3CE9
+     -400	-26 153 367	    FE70EE69
+     -100	-6 528 568	    FF9C61C8
+     -20	-1 284 270	    FFEC6752
+     +20	+1 340 471	    00147437
+     +100	+6 593 849	    00649D39
+     +400	+26 273 979	    0190E8BB
+     +900	+59 289 788	    0388B0BC
+     */
+	if (counterForResend != 7)
+	{
+		QTimer::singleShot(500, [this]() {
+
+			if(counterForResend==0)
+			{					
+				sendMessage(QByteArray::fromHex(QByteArray("7EA02102214193A585818014050207EE060207EE0704000000070804000000074EE97E")));
+			}
+
+			if(counterForResend==1)
+			{
+				sendMessage(QByteArray::fromHex(QByteArray("7EA0450221411095BFE6E6006036A1090607608574050801018A0207808B0760857405080201AC0A80083030303030303030BE10040E01000000065F1F0400621E5DFFFF114C7E")));
+			}
+
+			if(counterForResend==2)
+			{
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141321BA2E6E600C001C100010000000201FF02004F267E")));
+			}
+
+			if(counterForResend==3)
+			{
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E"))); //-900 - FC7C3CE9
+			}
+
+
+			if(counterForResend==4)
+			{
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
+			}
+
+			if(counterForResend==5)
+			{
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
+			}
+
+			if(counterForResend==6)
+			{
+				sendMessage(QByteArray::fromHex(QByteArray("7EA008022141535C727E")));
+			}
+
+			if (reTransmitQuery >= 4)
+			{
+				counterForResend = 7;
+				answerString += "No or stopped responses from remote socket. Maybe soft version less then 1.4.15";
+			}
+
+			myTimer->start(20000);
+			});
+	}
+	else
+	{
+		myTimer->stop();
+		socket->close();
+		reTransmitQuery = 0;
+	}
 }

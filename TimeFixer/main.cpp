@@ -12,6 +12,10 @@ int main(int argc, char* argv[])
 	QList <QPair<QString, QString>>hostArr;
 	int counterHost = 0;
 
+	TcpClient* test = new TcpClient("test");
+	test->startConnectToHost("172.16.125.241", "8888");
+
+	/*
 	if (readHostsFile(hostArr))
 	{
 		TcpClient* test = new TcpClient("test");
@@ -59,7 +63,7 @@ int main(int argc, char* argv[])
 			test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
 		}
 	}
-
+	*/
 	return app.exec();
 }
 

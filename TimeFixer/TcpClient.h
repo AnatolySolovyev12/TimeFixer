@@ -36,6 +36,8 @@ public:
 	QByteArray modbusCRCforArtDate(QString temp);
 	void stopConnectionWithHost();
 
+	void changeTimeM2M();
+
 
 signals:
 	void messageReceived(const int64_t&);
