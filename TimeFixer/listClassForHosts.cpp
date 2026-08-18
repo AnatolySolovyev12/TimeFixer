@@ -1,0 +1,114 @@
+#include "listClassForHosts.h"
+
+listClassForHosts::listClassForHosts(QObject *parent)
+	: QObject(parent)
+{
+	if (readHostsFile(hostArr))
+		initializeFunc();
+}
+
+
+
+bool listClassForHosts::readHostsFile(QList <QPair<QString, QString>>& temp)
+{
+	QFile file(QCoreApplication::applicationDirPath() + "\\hosts.txt");
+
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		qDebug() << "Don't find hosts file. Create file and try again";
+		return false;
+	}
+
+	QTextStream out(&file);
+
+	bool portBool = false;
+	QString ip;
+	QString port;
+	QString* myLine = new QString();
+
+	while (out.readLineInto(myLine, 0))
+	{
+		for (auto& val : *myLine)
+		{
+			if (val.isSpace())
+			{
+				portBool = true;
+				continue;
+			}
+
+			if (!portBool)
+			{
+				ip += val;
+			}
+			else
+			{
+				port += val;
+			}
+		}
+
+		temp.push_back(qMakePair(ip, port));
+		ip.clear();
+		port.clear();
+		portBool = false;
+	}
+
+	delete myLine;
+	myLine = nullptr;
+
+	file.close();
+
+	qDebug() << temp;
+	qDebug() << "Count of Hosts = " << temp.length();
+
+	return true;
+}
+
+
+
+void listClassForHosts::initializeFunc()
+{
+	host = new TcpClient("test");
+
+	QObject::connect(host, &TcpClient::finish, [&]() {
+
+		++counterHost;
+
+		QTimer::singleShot(1000, [&]() {
+
+			if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
+			{
+				QTimer::singleShot(28800000, [&]()  //28800000 - 8 часов
+					{
+						counterHost = 0;
+						qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+						host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+					});
+
+				return 0;
+			}
+			else
+			{
+				qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+				host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+			}
+			});
+
+		});
+
+	if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
+	{
+		QTimer::singleShot(28800000, [&]() //28800000 - 8 часов
+			{
+				counterHost = 0;
+				qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+				host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+			});
+
+		return;
+	}
+	else
+	{
+		qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+		host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+	}
+}

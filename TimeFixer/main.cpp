@@ -1,124 +1,13 @@
 #include <QtCore/QCoreApplication>
-#include "TcpClient.h"
-#include <qdatetime.h>
-#include <QFile>
+#include <listClassForHosts.h>
 
-bool readHostsFile(QList <QPair<QString, QString>>& temp);
+
 
 int main(int argc, char* argv[])
 {
 	QCoreApplication app(argc, argv);
 
-	QList <QPair<QString, QString>>hostArr;
-	int counterHost = 0;
+	listClassForHosts* host = new listClassForHosts();
 
-	TcpClient* test = new TcpClient("test");
-	test->startConnectToHost("172.16.125.241", "8888");
-
-	/*
-	if (readHostsFile(hostArr))
-	{
-		TcpClient* test = new TcpClient("test");
-
-		QObject::connect(test, &TcpClient::finish, [&]() {
-
-			++counterHost;
-
-			QTimer::singleShot(1000, [&]() {
-
-				if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
-				{
-					QTimer::singleShot(28800000, [&]()  //28800000 - 8 часов
-						{
-						counterHost = 0;
-						qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-						test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-						});
-
-					return 0;
-				}
-				else
-				{
-					qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-					test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-				}
-				});
-
-			});
-
-		if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
-		{
-			QTimer::singleShot(28800000, [&]() //28800000 - 8 часов
-				{
-					counterHost = 0;
-					qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-					test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-				});
-
-			return 0;
-		}
-		else
-		{
-			qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/'  + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-			test->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-		}
-	}
-	*/
 	return app.exec();
-}
-
-
-
-bool readHostsFile(QList <QPair<QString, QString>>& temp)
-{
-	QFile file(QCoreApplication::applicationDirPath() + "\\hosts.txt");
-
-	if (!file.open(QIODevice::ReadOnly))
-	{
-		qDebug() << "Don't find hosts file. Create file and try again";
-		return false;
-	}
-
-	QTextStream out(&file);
-
-	bool portBool = false;
-	QString ip;
-	QString port;
-	QString* myLine = new QString();
-
-	while (out.readLineInto(myLine, 0))
-	{
-		for (auto& val : *myLine)
-		{
-			if (val.isSpace())
-			{
-				portBool = true;
-				continue;
-			}
-
-			if (!portBool)
-			{
-				ip += val;
-			}
-			else
-			{
-				port += val;
-			}
-		}
-
-		temp.push_back(qMakePair(ip, port));
-		ip.clear();
-		port.clear();
-		portBool = false;
-	}
-
-	delete myLine;
-	myLine = nullptr;
-
-	file.close();
-
-	qDebug() << temp;
-	qDebug() << "Count of Hosts = " << temp.length();
-
-	return true;
 }

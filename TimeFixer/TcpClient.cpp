@@ -344,44 +344,45 @@ void TcpClient::changeTimeM2M()
      +400	+26 273 979	    0190E8BB
      +900	+59 289 788	    0388B0BC
      */
+
 	if (counterForResend != 7)
 	{
 		QTimer::singleShot(500, [this]() {
 
 			if(counterForResend==0)
 			{					
-				sendMessage(QByteArray::fromHex(QByteArray("7EA02102214193A585818014050207EE060207EE0704000000070804000000074EE97E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA02102214193A585818014050207EE060207EE0704000000070804000000074EE97E"))); // коррект
 			}
 
 			if(counterForResend==1)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA0450221411095BFE6E6006036A1090607608574050801018A0207808B0760857405080201AC0A80083030303030303030BE10040E01000000065F1F0400621E5DFFFF114C7E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA0450221411095BFE6E6006036A1090607608574050801018A0207808B0760857405080201AC0A80083030303030303030BE10040E01000000065F1F0400621E5DFFFF114C7E"))); //коррект
 			}
 
 			if(counterForResend==2)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141321BA2E6E600C001C100010000000201FF02004F267E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141321BA2E6E600C001C100010000000201FF02004F267E"))); // коррект
 			}
 
 			if(counterForResend==3)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E"))); //-900 - FC7C3CE9
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));//-900 - FC7C3CE9
 			}
 
 
 			if(counterForResend==4)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF06011000649D397E")));//+20 - 00147437
 			}
 
 			if(counterForResend==5)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF06011000649D397E")));//-100 - 00649D39
 			}
 
 			if(counterForResend==6)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA008022141535C727E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA008022141535C727E"))); // завершение при коррект
 			}
 
 			if (reTransmitQuery >= 4)

@@ -29,9 +29,15 @@
     <ClCompile Include="TcpClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="listClassForHosts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TcpClient.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="listClassForHosts.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
