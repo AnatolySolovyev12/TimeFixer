@@ -20,16 +20,9 @@ public:
 
 	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
-	QString returnResultString();
-	void setResultString(QString any);
-	void startConnectToHost(QString any, QString port);
-	void resetAnswerString();
-	void setKey(int64_t any);
-	const int64_t getKey();
-	QString getSerialStringForProtocol();
 
-	QString hexDateFunc(QString date);
-	quint16 crc16Kermit(const QByteArray& data);
+	void startConnectToHost(QString any, QString port);
+
 
 	void changeTimeArt();
 	QByteArray modbusCRCforArtTime(QString temp);
@@ -53,15 +46,12 @@ private slots:
 
 private:
 	QTcpSocket* socket;
-
+	bool inProcess = false;
 	bool connectedState = false;
-	QTimer* myTimer;
+	QTimer* myTimer = nullptr;
 	int counterForResend = 0;
-	QString answerString;
 	QString m_ip = "";
 	QString m_port = "";
 	int reTransmitQuery = 0;
 	QString serialStringForProtocol;
-	int64_t key = 0;
-	QString dailyArchiveString = "";
 };

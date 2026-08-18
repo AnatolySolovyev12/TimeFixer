@@ -69,32 +69,20 @@ void listClassForHosts::initializeFunc()
 {
 	host = new TcpClient("test");
 
-	QObject::connect(host, &TcpClient::finish, [&]() {
+	connect(host, &TcpClient::finish, this, [this]() {
 
 		++counterHost;
-
-		QTimer::singleShot(1000, [&]() {
-
-			if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
-			{
-				QTimer::singleShot(28800000, [&]()  //28800000 - 8 часов
-					{
-						counterHost = 0;
-						qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-						host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-					});
-
-				return 0;
-			}
-			else
-			{
-				qDebug() << "\n\n\n" << "Start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-				host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-			}
-			});
+		QTimer::singleShot(1000, [this]() { switchToNextHost(); });
 
 		});
+	
+	switchToNextHost();
+}
 
+
+
+void listClassForHosts::switchToNextHost()
+{
 	if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
 	{
 		QTimer::singleShot(28800000, [&]() //28800000 - 8 часов

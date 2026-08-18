@@ -14,6 +14,7 @@ public:
 	listClassForHosts(QObject *parent);
 	bool readHostsFile(QList <QPair<QString, QString>>& temp);
 	void initializeFunc();
+	void switchToNextHost();
 
 
 private:

@@ -32,12 +32,24 @@
     <ClCompile Include="listClassForHosts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dataBaseCLass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hostsFromDataBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TcpClient.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="listClassForHosts.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="dataBaseCLass.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="hostsFromDataBase.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
