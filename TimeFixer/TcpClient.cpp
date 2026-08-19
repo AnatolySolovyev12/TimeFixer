@@ -23,13 +23,24 @@ TcpClient::~TcpClient()
 
 void TcpClient::connectToSavedHost()
 {
-	if (socket->state() != QAbstractSocket::ConnectedState && !connectedState)
+	if (reConnectCounter >= 3)
 	{
-		socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
-		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
+		counterForResend = 0;
+		reConnectCounter = 0;
+		secondArtCommand = false;
+		emit stopConnection();
 	}
 	else
-		onConnected();
+	{
+		if (socket->state() != QAbstractSocket::ConnectedState && !connectedState)
+		{
+			reConnectCounter++;
+			socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
+			qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
+		}
+		else
+			changeTimeArt();
+	}
 }
 
 
@@ -59,11 +70,11 @@ void TcpClient::sendMessage(const QByteArray& message)
 
 void TcpClient::onConnected()
 {
-	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to host (" + QString::number(counterForResend + 1) + "): " << QHostAddress(m_ip).toString();
+	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to host (" + QString::number(reConnectCounter) + "): " << QHostAddress(m_ip).toString();
+	
 	connectedState = true;
 
-	if (!inProcess)
-		changeTimeArt();
+	changeTimeArt();
 	//changeTimeM2M();
 }
 
@@ -104,12 +115,16 @@ void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 	if (socket->errorString().contains("Connection timed out") || socket->errorString().contains("Connection refused"))
 	{
 		counterForResend = 0;
+		reConnectCounter = 0;
+		secondArtCommand = false;
 		emit finish();
 	}
 
 	if (socket->errorString().contains("The remote host closed the connection"))
 	{
 		counterForResend = 0;
+		reConnectCounter = 0;
+		secondArtCommand = false;
 		emit finish();
 	}
 }
@@ -119,11 +134,10 @@ void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 void TcpClient::stopConnectionWithHost()
 {
 	connectedState = false;
-	socket->close();
 	qDebug() << '\n' << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try disconnect from host " << QHostAddress(m_ip).toString() << "\n";
+
+	socket->close();
 }
-
-
 
 
 
@@ -181,59 +195,53 @@ QByteArray TcpClient::modbusCRCforArtDate(QString temp)
 
 void TcpClient::changeTimeArt()
 {
-	if (counterForResend++ >= 3)
+	if (counterForResend >= 6 || reConnectCounter >= 3)
 	{
 		counterForResend = 0;
+		reConnectCounter = 0;
+		secondArtCommand = false;
 		emit stopConnection();
-		emit finish();
+		QTimer::singleShot(500, [this]() {
+			emit finish();
+			});
 
 		return;
 	}
 
-	QTimer::singleShot(50, [this]() {
 
-		if (socket->state() == QAbstractSocket::ConnectedState && connectedState)
-		{
-			sendMessage(QByteArray(modbusCRCforArtTime(QTime::currentTime().toString("HHmmss"))));
-			inProcess = true;
-		}
-		else
-		{
-			qDebug() << "Socket not open!";
-			connectToSavedHost();
-			return;
-		}
-
-		
-
-		});
-
-	QTimer::singleShot(3000, [this]() {
-
-		if (socket->state() == QAbstractSocket::ConnectedState && connectedState)
-			sendMessage(QByteArray(modbusCRCforArtDate(QDate::currentDate().toString("ddMMyy"))));
-		else
-		{
-			qDebug() << "Socket not open!";
-			connectToSavedHost();
-		}
-		});
-
-	if (counterForResend <= 3)
+	if (socket->state() == QAbstractSocket::ConnectedState && connectedState)
 	{
-		QTimer::singleShot(7000, [this]() { 
-			changeTimeArt(); 
-		inProcess = false; 
+		if (secondArtCommand)
+			sendMessage(QByteArray(modbusCRCforArtTime(QTime::currentTime().toString("HHmmss"))));
+		else
+			sendMessage(QByteArray(modbusCRCforArtDate(QDate::currentDate().toString("ddMMyy"))));
+
+		secondArtCommand = !secondArtCommand;
+	}
+	else
+	{
+		qDebug() << "Socket not open!";
+		connectToSavedHost();
+	}
+
+
+	if (counterForResend++ < 6 || reConnectCounter < 3)
+	{
+		QTimer::singleShot(4000, [this]() {
+			changeTimeArt();
 			});
 	}
 	else
 	{
 		counterForResend = 0;
+		reConnectCounter = 0;
+		secondArtCommand = false;
 		emit stopConnection();
-		emit finish();
+		QTimer::singleShot(500, [this]() {
+			emit finish();
+			});
 	}
 }
-
 
 
 

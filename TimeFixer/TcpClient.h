@@ -46,12 +46,15 @@ private slots:
 
 private:
 	QTcpSocket* socket;
-	bool inProcess = false;
-	bool connectedState = false;
 	QTimer* myTimer = nullptr;
-	int counterForResend = 0;
 	QString m_ip = "";
 	QString m_port = "";
-	int reTransmitQuery = 0;
 	QString serialStringForProtocol;
+	
+	bool connectedState = false;
+	int reTransmitQuery = 0;
+	int counterForResend = 0;
+	int reConnectCounter = 0;
+	bool secondArtCommand = false;
+
 };
