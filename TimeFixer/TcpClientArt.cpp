@@ -1,16 +1,16 @@
-﻿#include "TcpClient.h"
+﻿#include "TcpClientArt.h"
 
-TcpClient::TcpClient(QString any, QObject* parent) : serialStringForProtocol(any), QObject(parent), socket(new QTcpSocket(this))
+TcpClientArt::TcpClientArt(QString any, QObject* parent) : serialStringForProtocol(any), QObject(parent), socket(new QTcpSocket(this))
 {
 	AttachConsole(ATTACH_PARENT_PROCESS);
 
-	connect(socket, &QTcpSocket::connected, this, &TcpClient::onConnected);
-	connect(socket, &QTcpSocket::disconnected, this, &TcpClient::onDisconnected);
-	connect(socket, &QTcpSocket::readyRead, this, &TcpClient::onReadyRead);
-	connect(socket, &QTcpSocket::errorOccurred, this, &TcpClient::onErrorOccurred);
+	connect(socket, &QTcpSocket::connected, this, &TcpClientArt::onConnected);
+	connect(socket, &QTcpSocket::disconnected, this, &TcpClientArt::onDisconnected);
+	connect(socket, &QTcpSocket::readyRead, this, &TcpClientArt::onReadyRead);
+	connect(socket, &QTcpSocket::errorOccurred, this, &TcpClientArt::onErrorOccurred);
 }
 
-TcpClient::~TcpClient()
+TcpClientArt::~TcpClientArt()
 {
 	if (socket->isOpen()) {
 		socket->close();
@@ -19,7 +19,7 @@ TcpClient::~TcpClient()
 
 
 
-void TcpClient::connectToSavedHost()
+void TcpClientArt::connectToSavedHost()
 {
 	if (reConnectCounter >= 3)
 	{
@@ -44,16 +44,16 @@ void TcpClient::connectToSavedHost()
 				socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
 			}
 
-			qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to " + QHostAddress(m_ip).toString() << ':' << m_port;
+			qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to (" + QString::number(reConnectCounter) + "): " << QHostAddress(m_ip).toString() << ':' << m_port;
 		}
 		else
-			changeTimeArt();
+			changeDateTime();
 	}
 }
 
 
 
-void TcpClient::startConnectToHost(QString any, QString port)
+void TcpClientArt::startConnectToHost(QString any, QString port)
 {
 	m_ip = any;
 	m_port = port;
@@ -62,7 +62,7 @@ void TcpClient::startConnectToHost(QString any, QString port)
 
 
 
-void TcpClient::sendMessage(const QByteArray& message)
+void TcpClientArt::sendMessage(const QByteArray& message)
 {
 	if (socket->state() == QTcpSocket::ConnectedState)
 	{
@@ -78,23 +78,23 @@ void TcpClient::sendMessage(const QByteArray& message)
 
 
 
-void TcpClient::onConnected()
+void TcpClientArt::onConnected()
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to host (" + QString::number(reConnectCounter) + "): " << QHostAddress(m_ip).toString();
 
-	changeTimeArt();
+	changeDateTime();
 }
 
 
 
-void TcpClient::onDisconnected()
+void TcpClientArt::onDisconnected()
 {
 	qDebug() << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Disconnected from host.\n";
 }
 
 
 
-void TcpClient::onReadyRead()
+void TcpClientArt::onReadyRead()
 {
 	QByteArray data = socket->readAll();
 
@@ -103,11 +103,11 @@ void TcpClient::onReadyRead()
 
 
 
-void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
+void TcpClientArt::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString();
 
-	if (socket->errorString().contains("Connection timed out") || socket->errorString().contains("Connection refused") || socket->errorString().contains("The remote host closed the connection"))
+	if (socket->errorString().contains("Connection timed out") || socket->errorString().contains("Connection refused") || (socket->errorString().contains("The remote host closed the connection") && counterForResend >= 2))
 	{
 		artCycleFinished = true;
 		counterForResend = 0;
@@ -119,7 +119,7 @@ void TcpClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 
 
 
-void TcpClient::stopConnectionWithHost()
+void TcpClientArt::stopConnectionWithHost()
 {
 	qDebug() << '\n' << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try disconnect from host " << QHostAddress(m_ip).toString() << "\n";
 
@@ -128,7 +128,7 @@ void TcpClient::stopConnectionWithHost()
 
 
 
-QByteArray TcpClient::modbusCRCforArtTime(QString temp)
+QByteArray TcpClientArt::modbusCRCforArtTime(QString temp)
 {
 	QByteArray command = "@00000C" + temp.toLatin1();
 
@@ -156,7 +156,7 @@ QByteArray TcpClient::modbusCRCforArtTime(QString temp)
 
 
 
-QByteArray TcpClient::modbusCRCforArtDate(QString temp)
+QByteArray TcpClientArt::modbusCRCforArtDate(QString temp)
 {
 	QByteArray command = "@00000D1" + temp.toLatin1();
 
@@ -180,7 +180,7 @@ QByteArray TcpClient::modbusCRCforArtDate(QString temp)
 
 
 
-void TcpClient::changeTimeArt()
+void TcpClientArt::changeDateTime()
 {
 	if (artCycleFinished)
 		return;
@@ -212,19 +212,19 @@ void TcpClient::changeTimeArt()
 		++counterForResend;
 
 		QTimer::singleShot(5000, [this]() {
-			changeTimeArt();
+			changeDateTime();
 			});
 	}
 	else
 	{
-		qDebug() << "TcpClient::changeTimeArt() -> Socket not open. Try reconnect.";
+		qDebug() << "TcpClientArt::changeDateTime() -> Socket not open. Try reconnect.";
 		connectToSavedHost();
 	}
 }
 
 
 
-void TcpClient::changeTimeM2M()
+void TcpClientArt::changeTimeM2M()
 {
 	/*
 	 -900	-58 966 807	    FC7C3CE9

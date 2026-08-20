@@ -9,14 +9,14 @@
 #include <qdatetime.h>
 #include <QtEndian>
 
-class TcpClient : public QObject
+class TcpClientArt : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit TcpClient(QString any, QObject* parent = nullptr);
+	explicit TcpClientArt(QString any, QObject* parent = nullptr);
 
-	~TcpClient();
+	~TcpClientArt();
 
 	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
@@ -24,7 +24,7 @@ public:
 	void startConnectToHost(QString any, QString port);
 
 
-	void changeTimeArt();
+	void changeDateTime();
 	QByteArray modbusCRCforArtTime(QString temp);
 	QByteArray modbusCRCforArtDate(QString temp);
 	void stopConnectionWithHost();

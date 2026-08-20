@@ -67,9 +67,9 @@ bool listClassForHosts::readHostsFile(QList <QPair<QString, QString>>& temp)
 
 void listClassForHosts::initializeFunc()
 {
-	host = new TcpClient("test");
+	host = new TcpClientArt("test");
 
-	connect(host, &TcpClient::finish, this, [this]() {
+	connect(host, &TcpClientArt::finish, this, [this]() {
 
 		++counterHost;
 		QTimer::singleShot(1000, [this]() { switchToNextHost(); });

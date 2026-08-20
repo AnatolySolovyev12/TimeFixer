@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include "TcpClient.h"
+#include "TcpClientArt.h"
 #include <qdatetime.h>
 #include <QFile>
 #include <QCoreApplication>
@@ -20,6 +20,6 @@ public:
 private:
 	QList <QPair<QString, QString>>hostArr;
 	int counterHost = 0;
-	TcpClient* host;
+	TcpClientArt* host;
 };
 
