@@ -3,6 +3,8 @@
 #include <QObject>
 #include <qdebug.h>
 #include <iostream>
+#include <qdatetime.h>
+#include "TcpClientM2M.h"
 
 class hostsFromDataBase : public QObject
 {
@@ -26,6 +28,7 @@ public:
 	void pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer);
 	void showArray();
 	void makeClients();
+
 
 private:
 

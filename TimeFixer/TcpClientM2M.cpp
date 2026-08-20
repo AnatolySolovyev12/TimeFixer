@@ -8,6 +8,10 @@ TcpClientM2M::TcpClientM2M(QObject* parent) : QObject(parent), socket(new QTcpSo
 	connect(socket, &QTcpSocket::disconnected, this, &TcpClientM2M::onDisconnected);
 	connect(socket, &QTcpSocket::readyRead, this, &TcpClientM2M::onReadyRead);
 	connect(socket, &QTcpSocket::errorOccurred, this, &TcpClientM2M::onErrorOccurred);
+
+	myTimer = new QTimer();
+	connect(myTimer, &QTimer::timeout, this, &TcpClientM2M::exchangeFromTimer);
+
 }
 
 
@@ -23,11 +27,11 @@ TcpClientM2M::~TcpClientM2M()
 
 void TcpClientM2M::connectToSavedHost()
 {
+	
 	if (reConnectCounter >= 3)
 	{
 		counterForResend = 0;
 		reConnectCounter = 0;
-		secondArtCommand = false;
 		stopConnectionWithHost();
 	}
 	else
@@ -35,8 +39,6 @@ void TcpClientM2M::connectToSavedHost()
 		if (socket->state() != QAbstractSocket::ConnectedState)
 		{
 			qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try connect to (" + QString::number(reConnectCounter) + "): " << QHostAddress(m_ip).toString() << ':' << m_port;
-
-			artCycleFinished = false;
 
 			reConnectCounter++;
 
@@ -67,7 +69,7 @@ void TcpClientM2M::sendMessage(const QByteArray& message)
 	if (socket->state() == QTcpSocket::ConnectedState)
 	{
 		socket->write(message);
-		QString temp = '(' + QString::number(counterForResend + 1) + ") >> ";
+		QString temp = '(' + QString::number(counterForResend) + ") >> ";
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX " + temp << message.toHex();
 	}
 	else
@@ -89,7 +91,7 @@ void TcpClientM2M::onConnected()
 
 void TcpClientM2M::onDisconnected()
 {
-	qDebug() << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Disconnected from host.\n";
+	qDebug() << '\n' << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Disconnected from host.\n";
 }
 
 
@@ -99,22 +101,61 @@ void TcpClientM2M::onReadyRead()
 	QByteArray data = socket->readAll();
 
 	qDebug() << "RX << " << data.toHex();
+
+
+	/*
+	if (data.toHex().length() < 35 && (serialStringForProtocol == "]101" || serialStringForProtocol == "]103" || serialStringForProtocol == "]102" || serialStringForProtocol == "]104" || serialStringForProtocol == "]106" || serialStringForProtocol == "]109") && counterForResend >= 2)
+	{
+		qDebug() << "\nincorrect RX. Resend";
+		reTransmitQuery++;
+		myTimer->stop();
+		getDaily();
+		return;
+	}
+	*/
+
+
+	if (counterForResend == 3) ////////////////// тут нужны правки
+	{
+		QString dateTaime = data.toHex();
+
+		if (checkDateTimeFromDevice(dateTaime) == 0)
+		{
+			counterForResend - 2;
+		}
+
+
+	}
+
+
+	myTimer->stop();
+	counterForResend++;
+	reTransmitQuery = 0;
+
+	changeTimeM2M();
 }
 
+void TcpClientM2M::exchangeFromTimer()
+{
+	++reTransmitQuery;
 
+	changeTimeM2M();
+}
 
 void TcpClientM2M::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString() << '\n';
 
+
 	if (socket->errorString().contains("Connection timed out") || socket->errorString().contains("Connection refused") || (socket->errorString().contains("The remote host closed the connection") && counterForResend >= 2))
 	{
-		artCycleFinished = true;
 		counterForResend = 0;
+		reTransmitQuery = 0;
 		reConnectCounter = 0;
-		secondArtCommand = false;
+
 		emit finish();
 	}
+
 }
 
 
@@ -126,7 +167,7 @@ void TcpClientM2M::stopConnectionWithHost()
 	socket->abort();
 }
 
-
+/*
 void TcpClientM2M::changeDateTime()
 {
 	if (artCycleFinished)
@@ -168,23 +209,12 @@ void TcpClientM2M::changeDateTime()
 		connectToSavedHost();
 	}
 }
-
+*/
 
 
 void TcpClientM2M::changeTimeM2M()
 {
-	/*
-	 -900	-58 966 807	    FC7C3CE9
-	 -400	-26 153 367	    FE70EE69
-	 -100	-6 528 568	    FF9C61C8
-	 -20	-1 284 270	    FFEC6752
-	 +20	+1 340 471	    00147437
-	 +100	+6 593 849	    00649D39
-	 +400	+26 273 979	    0190E8BB
-	 +900	+59 289 788	    0388B0BC
-	 */
-
-	if (counterForResend != 7)
+	if (counterForResend != 6)
 	{
 		QTimer::singleShot(500, [this]() {
 
@@ -205,27 +235,25 @@ void TcpClientM2M::changeTimeM2M()
 
 			if (counterForResend == 3)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));//-900 - FC7C3CE9
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141763BA6E6E600C001C100080000010000FF0200601A7E")));// запрашиваем текущее время устройства
+
+
 			}
 
 			if (counterForResend == 4)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));//-900 - FC7C3CE9
+
 			}
 
 			if (counterForResend == 5)
-			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
-			}
-
-			if (counterForResend == 6)
 			{
 				sendMessage(QByteArray::fromHex(QByteArray("7EA008022141535C727E"))); // завершение при коррект
 			}
 
 			if (reTransmitQuery >= 4)
 			{
-				counterForResend = 7;
+				counterForResend = 6;
 			}
 
 			myTimer->start(20000);
@@ -236,5 +264,78 @@ void TcpClientM2M::changeTimeM2M()
 		myTimer->stop();
 		socket->close();
 		reTransmitQuery = 0;
+		m_ip = "";
+		m_port = 0;
+		emit finish();
 	}
+}
+
+
+
+
+long TcpClientM2M::checkDateTimeFromDevice(QString rxString)
+{
+	QString temp = rxString;
+
+	qDebug() << '\n' << "QString in checkDateTimeFromDevice = " + temp;
+
+	temp.chop(14);
+
+	QString dateTime = temp.sliced(36);
+
+	QString year = dateTime;
+	year.chop(12);
+
+	QString month = dateTime.sliced(4);
+	month.chop(10);
+
+	QString day = dateTime.sliced(6);
+	day.chop(8);
+
+	QString hour = dateTime.sliced(10);
+	hour.chop(4);
+
+	QString minute = dateTime.sliced(12);
+	minute.chop(2);
+
+	QString second = dateTime.sliced(14);
+
+	qDebug() << dateTime;
+	qDebug() << year;
+	qDebug() << month;
+	qDebug() << day;
+	qDebug() << hour;
+	qDebug() << minute;
+	qDebug() << second;
+
+	bool ok;
+	qDebug() << QString::number(year.toUInt(&ok, 16)) + '\-' + QString::number(month.toUInt(&ok, 16)) + '\-' + QString::number(day.toUInt(&ok, 16)) + "   " + QString::number(hour.toUInt(&ok, 16)) + '\:' + QString::number(minute.toUInt(&ok, 16)) + '\:' + QString::number(second.toUInt(&ok, 16));
+
+
+	QString fullDate = QString::number(year.toUInt(&ok, 16)) + '\-' + (QString::number(month.toUInt(&ok, 16)).length() != 1 ? QString::number(month.toUInt(&ok, 16)) : ("0" + QString::number(month.toUInt(&ok, 16)))) + '\-' + QString::number(day.toUInt(&ok, 16));
+
+	qDebug() << "fullDate - " << QDate::fromString(fullDate, "yyyy-MM-dd").isValid() << fullDate;
+	qDebug() << "CurrDate - " << QDate::currentDate().isValid() << QDate::currentDate();
+
+
+	QString fullTime = QString::number(hour.toUInt(&ok, 16)) + '\:' + QString::number(minute.toUInt(&ok, 16)) + '\:' + QString::number(second.toUInt(&ok, 16));
+
+	qDebug() << "FullTime - " << QTime::fromString(fullTime).isValid() << QTime::fromString(fullTime);
+	qDebug() << "CurrTime - " << QTime::currentTime().isValid() << QTime::currentTime();
+
+	qDebug() << "Date difference = " + QString::number(QDate::fromString(fullDate, "yyyy-MM-dd").daysTo(QDate::currentDate())) + " = " + QString::number(QDate::fromString(fullDate, "yyyy-MM-dd").daysTo(QDate::currentDate()) * 86400);
+
+	qDebug() << "Time difference = " << QTime::fromString(fullTime).secsTo(QTime::currentTime());
+
+	qDebug() << "Full difference = " << (QDate::fromString(fullDate, "yyyy-MM-dd").daysTo(QDate::currentDate()) * 86400) + QTime::fromString(fullTime).secsTo(QTime::currentTime());
+
+	long seconds = (QDate::fromString(fullDate, "yyyy-MM-dd").daysTo(QDate::currentDate()) * 86400) + QTime::fromString(fullTime).secsTo(QTime::currentTime());
+
+	if (seconds <= 50000)
+	{
+		if (seconds <= 900)
+			return 0;
+	}
+	else
+		return 9;
 }

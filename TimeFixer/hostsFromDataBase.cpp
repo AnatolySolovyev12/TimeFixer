@@ -2,7 +2,11 @@
 
 hostsFromDataBase::hostsFromDataBase(QObject *parent)
 	: QObject(parent)
-{}
+{
+	TcpClientM2M* test = new TcpClientM2M(); ///////
+
+	test->startConnectToHost("172.16.42.234", "8888");
+}
 
 hostsFromDataBase::~hostsFromDataBase()
 {}
@@ -34,3 +38,5 @@ void hostsFromDataBase::makeClients()
 
 
 }
+
+

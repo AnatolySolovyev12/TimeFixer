@@ -22,14 +22,11 @@ public:
 	void sendMessage(const QByteArray& message);
 
 	void startConnectToHost(QString any, QString port);
-
-
-	void changeDateTime();
-	QByteArray modbusCRCforArtTime(QString temp);
-	QByteArray modbusCRCforArtDate(QString temp);
 	void stopConnectionWithHost();
 
 	void changeTimeM2M();
+	void exchangeFromTimer();
+	long checkDateTimeFromDevice(QString rxString);
 
 
 signals:
@@ -56,4 +53,5 @@ private:
 	int reConnectCounter = 0;
 	bool secondArtCommand = false;
 	bool artCycleFinished = false;
+	int typeDifferent = 0; // 0 - 900            9 - too much
 };

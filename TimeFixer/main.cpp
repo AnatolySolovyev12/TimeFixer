@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 	QObject::connect(dBclass, &dataBaseCLass::deviceParams, hostsDataBase, &hostsFromDataBase::pushHostInArr);
 	QObject::connect(dBclass, &dataBaseCLass::showArray, hostsDataBase, &hostsFromDataBase::showArray);
 
-	dBclass->getDeviceParams();
+	//dBclass->getDeviceParams();
 
 	return app.exec();
 }
