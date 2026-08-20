@@ -67,7 +67,7 @@ void TcpClientArt::sendMessage(const QByteArray& message)
 	if (socket->state() == QTcpSocket::ConnectedState)
 	{
 		socket->write(message);
-		QString temp = '(' + QString::number(counterForResend) + ") >> ";
+		QString temp = '(' + QString::number(counterForResend+1) + ") >> ";
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX " + temp << message.toHex();
 	}
 	else
