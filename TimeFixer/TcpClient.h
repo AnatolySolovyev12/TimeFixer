@@ -35,7 +35,6 @@ public:
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
-	void stopConnection();
 	void finish();
 
 private slots:
@@ -56,5 +55,5 @@ private:
 	int counterForResend = 0;
 	int reConnectCounter = 0;
 	bool secondArtCommand = false;
-
+	bool artCycleFinished = false;
 };
