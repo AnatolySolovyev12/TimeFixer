@@ -1,18 +1,18 @@
-﻿#include "TcpClientArt.h"
+#include "TcpClientM2M.h"
 
-TcpClientArt::TcpClientArt(QObject* parent) : QObject(parent), socket(new QTcpSocket(this))
+TcpClientM2M::TcpClientM2M(QObject* parent) : QObject(parent), socket(new QTcpSocket(this))
 {
 	AttachConsole(ATTACH_PARENT_PROCESS);
 
-	connect(socket, &QTcpSocket::connected, this, &TcpClientArt::onConnected);
-	connect(socket, &QTcpSocket::disconnected, this, &TcpClientArt::onDisconnected);
-	connect(socket, &QTcpSocket::readyRead, this, &TcpClientArt::onReadyRead);
-	connect(socket, &QTcpSocket::errorOccurred, this, &TcpClientArt::onErrorOccurred);
+	connect(socket, &QTcpSocket::connected, this, &TcpClientM2M::onConnected);
+	connect(socket, &QTcpSocket::disconnected, this, &TcpClientM2M::onDisconnected);
+	connect(socket, &QTcpSocket::readyRead, this, &TcpClientM2M::onReadyRead);
+	connect(socket, &QTcpSocket::errorOccurred, this, &TcpClientM2M::onErrorOccurred);
 }
 
 
 
-TcpClientArt::~TcpClientArt()
+TcpClientM2M::~TcpClientM2M()
 {
 	if (socket->isOpen()) {
 		socket->close();
@@ -21,7 +21,7 @@ TcpClientArt::~TcpClientArt()
 
 
 
-void TcpClientArt::connectToSavedHost()
+void TcpClientM2M::connectToSavedHost()
 {
 	if (reConnectCounter >= 3)
 	{
@@ -53,7 +53,7 @@ void TcpClientArt::connectToSavedHost()
 
 
 
-void TcpClientArt::startConnectToHost(QString any, QString port)
+void TcpClientM2M::startConnectToHost(QString any, QString port)
 {
 	m_ip = any;
 	m_port = port;
@@ -62,12 +62,12 @@ void TcpClientArt::startConnectToHost(QString any, QString port)
 
 
 
-void TcpClientArt::sendMessage(const QByteArray& message)
+void TcpClientM2M::sendMessage(const QByteArray& message)
 {
 	if (socket->state() == QTcpSocket::ConnectedState)
 	{
 		socket->write(message);
-		QString temp = '(' + QString::number(counterForResend+1) + ") >> ";
+		QString temp = '(' + QString::number(counterForResend + 1) + ") >> ";
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX " + temp << message.toHex();
 	}
 	else
@@ -78,23 +78,23 @@ void TcpClientArt::sendMessage(const QByteArray& message)
 
 
 
-void TcpClientArt::onConnected()
+void TcpClientM2M::onConnected()
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Connected to host (" + QString::number(reConnectCounter) + "): " << QHostAddress(m_ip).toString();
 
-	changeDateTime();
+	changeTimeM2M();
 }
 
 
 
-void TcpClientArt::onDisconnected()
+void TcpClientM2M::onDisconnected()
 {
 	qDebug() << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Disconnected from host.\n";
 }
 
 
 
-void TcpClientArt::onReadyRead()
+void TcpClientM2M::onReadyRead()
 {
 	QByteArray data = socket->readAll();
 
@@ -103,7 +103,7 @@ void TcpClientArt::onReadyRead()
 
 
 
-void TcpClientArt::onErrorOccurred(QAbstractSocket::SocketError socketError)
+void TcpClientM2M::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString() << '\n';
 
@@ -119,7 +119,7 @@ void TcpClientArt::onErrorOccurred(QAbstractSocket::SocketError socketError)
 
 
 
-void TcpClientArt::stopConnectionWithHost()
+void TcpClientM2M::stopConnectionWithHost()
 {
 	qDebug() << '\n' << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try disconnect from host " << QHostAddress(m_ip).toString() << "\n";
 
@@ -127,60 +127,7 @@ void TcpClientArt::stopConnectionWithHost()
 }
 
 
-
-QByteArray TcpClientArt::modbusCRCforArtTime(QString temp)
-{
-	QByteArray command = "@00000C" + temp.toLatin1();
-
-	quint32 sum = 0;
-
-	for (char byte : command) {
-		sum += static_cast<unsigned char>(byte);
-	}
-
-	quint8 checksum = static_cast<quint8>(sum & 0xFF);
-
-	QByteArray checksumAscii =
-		QString("%1")
-		.arg(checksum, 2, 16, QChar('0'))
-		.toUpper()
-		.toLatin1();
-
-	QByteArray frame = command + checksumAscii + '\r';
-
-	//qDebug() << frame;
-	//qDebug() << frame.toHex(' ');
-
-	return frame;
-}
-
-
-
-QByteArray TcpClientArt::modbusCRCforArtDate(QString temp)
-{
-	QByteArray command = "@00000D1" + temp.toLatin1();
-
-	quint32 sum = 0;
-
-	for (char byte : command)
-		sum += static_cast<unsigned char>(byte);
-
-	quint8 checksum = static_cast<quint8>(sum & 0xFF);
-
-	QByteArray checksumAscii =
-		QString("%1")
-		.arg(checksum, 2, 16, QChar('0'))
-		.toUpper()
-		.toLatin1();
-
-	QByteArray frame = command + checksumAscii + '\r';
-
-	return frame;
-}
-
-
-
-void TcpClientArt::changeDateTime()
+void TcpClientM2M::changeDateTime()
 {
 	if (artCycleFinished)
 		return;
@@ -212,19 +159,19 @@ void TcpClientArt::changeDateTime()
 		++counterForResend;
 
 		QTimer::singleShot(5000, [this]() {
-			changeDateTime();
+			changeTimeM2M();
 			});
 	}
 	else
 	{
-		qDebug() << '\n' << "TcpClientArt::changeDateTime() -> Socket not open. Try reconnect.";
+		qDebug() << '\n' << "TcpClientM2M::changeDateTime() -> Socket not open. Try reconnect.";
 		connectToSavedHost();
 	}
 }
 
 
 
-void TcpClientArt::changeTimeM2M()
+void TcpClientM2M::changeTimeM2M()
 {
 	/*
 	 -900	-58 966 807	    FC7C3CE9
@@ -243,17 +190,17 @@ void TcpClientArt::changeTimeM2M()
 
 			if (counterForResend == 0)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA02102214193A585818014050207EE060207EE0704000000070804000000074EE97E"))); // коррект
+				sendMessage(QByteArray::fromHex(QByteArray("7EA02102214193A585818014050207EE060207EE0704000000070804000000074EE97E")));
 			}
 
 			if (counterForResend == 1)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA0450221411095BFE6E6006036A1090607608574050801018A0207808B0760857405080201AC0A80083030303030303030BE10040E01000000065F1F0400621E5DFFFF114C7E"))); //коррект
+				sendMessage(QByteArray::fromHex(QByteArray("7EA0450221411095BFE6E6006036A1090607608574050801018A0207808B0760857405080201AC0A80083030303030303030BE10040E01000000065F1F0400621E5DFFFF114C7E")));
 			}
 
 			if (counterForResend == 2)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141321BA2E6E600C001C100010000000201FF02004F267E"))); // коррект
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141321BA2E6E600C001C100010000000201FF02004F267E")));
 			}
 
 			if (counterForResend == 3)
@@ -261,20 +208,19 @@ void TcpClientArt::changeTimeM2M()
 				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));//-900 - FC7C3CE9
 			}
 
-
 			if (counterForResend == 4)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF06011000649D397E")));//+20 - 00147437
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
 			}
 
 			if (counterForResend == 5)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF06011000649D397E")));//-100 - 00649D39
+				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));
 			}
 
 			if (counterForResend == 6)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA008022141535C727E"))); // завершение при коррект
+				sendMessage(QByteArray::fromHex(QByteArray("7EA008022141535C727E"))); // ���������� ��� �������
 			}
 
 			if (reTransmitQuery >= 4)

@@ -66,6 +66,7 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
+    <ClCompile Include="TcpClientM2M.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TcpClientArt.h" />
@@ -78,6 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="hostsFromDataBase.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="TcpClientM2M.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

@@ -1,4 +1,4 @@
-﻿
+
 
 #include <QObject>
 #include <QTcpSocket>
@@ -9,14 +9,14 @@
 #include <qdatetime.h>
 #include <QtEndian>
 
-class TcpClientArt : public QObject
+class TcpClientM2M : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit TcpClientArt(QObject* parent = nullptr);
+	explicit TcpClientM2M(QObject* parent = nullptr);
 
-	~TcpClientArt();
+	~TcpClientM2M();
 
 	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
@@ -49,7 +49,7 @@ private:
 	QString m_ip = "";
 	QString m_port = "";
 	QString serialStringForProtocol;
-	
+
 	bool connectedState = false;
 	int reTransmitQuery = 0;
 	int counterForResend = 0;

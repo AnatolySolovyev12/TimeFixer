@@ -67,7 +67,7 @@ bool listClassForHosts::readHostsFile(QList <QPair<QString, QString>>& temp)
 
 void listClassForHosts::initializeFunc()
 {
-	host = new TcpClientArt("test");
+	host = new TcpClientArt();
 
 	connect(host, &TcpClientArt::finish, this, [this]() {
 

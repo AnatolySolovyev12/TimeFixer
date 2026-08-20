@@ -15,17 +15,22 @@ dataBaseCLass::~dataBaseCLass()
 
 void dataBaseCLass::connectDataBase()
 {
-	mw_db = QSqlDatabase::addDatabase("QODBC");
+	qDebug() << "Drivers: " << QSqlDatabase::drivers();
+	qDebug() << "LibraryDriverPath: " << QCoreApplication::libraryPaths();
+
+	mw_db = QSqlDatabase::addDatabase("QODBC", "TimeFixerConnection");
 
 	mw_db.setDatabaseName("DRIVER={SQL Server};SERVER=10.86.142.14;DATABASE=ProSoft_ASKUE;UID=solexp;PWD=RootToor#;");
 
-	if (!mw_db.open()) 
+	if (!mw_db.open())
 	{
 		mw_db.lastError().databaseText(); // если что-то пойдёт не так то пишем это в переменные
 		mw_db.lastError().driverText();
 
-		qDebug() << "Can't open database: " + mw_db.lastError().text();
+		qDebug() << '\n' << "Can't open database: " + mw_db.lastError().text() << '\n';
 	}
+	else
+		qDebug() << '\n' << mw_db.connectionName() + " is OPEN" << '\n';
 }
 
 
@@ -34,36 +39,36 @@ void dataBaseCLass::getDeviceParams()
 {
 	connectDataBase();
 
-	QSqlQuery query;
+	QSqlQuery query(mw_db);
 	QString queryString = QString(R"(
-SELECT DISTINCT U.Name as 'name', U.URL as 'IP и Port', U.PhoneNum as 'CSD', U.NumUSD as 'network ip', 
+SELECT DISTINCT U.Name as 'Название точки в консоли', U.URL as 'IP и Port', U.PhoneNum as 'CSD', U.NumUSD as 'Сетевой адрес', 
 
  SUBSTRING(
     A.Info,
     CHARINDEX('TimeDiff=', A.Info) + LEN('TimeDiff='),
 
     CHARINDEX(CHAR(10), A.Info, CHARINDEX('TimeDiff=', A.Info)) - (CHARINDEX('TimeDiff=', A.Info) + LEN('TimeDiff='))
-) AS 'TimeDiff',
+) AS 'Отклонение времени в секундах',
 
  SUBSTRING(
     A.Info,
     CHARINDEX('SerNum=', A.Info) + LEN('SerNum='),
 
     CHARINDEX(CHAR(10), A.Info, CHARINDEX('SerNum=', A.Info)) - (CHARINDEX('SerNum=', A.Info) + LEN('SerNum='))
-) AS 'Serial',
+) AS 'Серийный номер',
 
  SUBSTRING(
     A.Info,
     CHARINDEX('SoftVer=', A.Info) + LEN('SoftVer='),
 
     CHARINDEX(CHAR(10), A.Info, CHARINDEX('SoftVer=', A.Info)) - (CHARINDEX('SoftVer=', A.Info) + LEN('SoftVer='))
-) AS 'SoftVer'
+) AS 'Версия ПО'
 
   FROM AutoInfo as A
   JOIN USD as U on A.ID_USPD = U.ID_USPD
 WHERE TypeInfo = 'USPD'
   AND DT >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
-  AND Info LIKE '%TimeDiff=%'
+  AND Info LIKE '%TimeDiff=%'  -- Убеждаемся что строка содержит TimeDiff
   AND SUBSTRING(A.Info, 
                 CHARINDEX('TimeDiff=', A.Info) + LEN('TimeDiff='), 
                 CHARINDEX(CHAR(10), A.Info, CHARINDEX('TimeDiff=', A.Info)) - 
@@ -75,13 +80,13 @@ WHERE TypeInfo = 'USPD'
                   (CHARINDEX('TimeDiff=', A.Info) + LEN('TimeDiff='))
     )) -1 >= 8
 
-ORDER BY 4 DESC
+ORDER BY 4 DESC -- Сортировка по 4-й колонке (Отклонение времени в секундах)
 )");
 
-	if (!query.exec() || !query.next())
+	if (!query.exec(queryString) || !query.next())
 	{
-		if(query.lastError().isValid())
-			qDebug() << "Error in dataBaseCLass::getDeviceParams() when try to get all device with time diff.\nError: " + query.lastError().text();
+		if (query.lastError().isValid())
+			qDebug() << "Error in dataBaseCLass::getDeviceParams() when try to get all device with time diff" << '\n' << "Error: " << query.lastError().text();
 		else
 			qDebug() << "dataBaseCLass::getDeviceParams() is no get devices with diff";
 	}
@@ -89,12 +94,23 @@ ORDER BY 4 DESC
 	{
 		do
 		{
-			emit deviceParams(query.value(0).toString(), query.value(1).toString(), query.value(2).toString(), query.value(3).toString(), query.value(4).toString(), query.value(5).toString());
+			//qDebug() << query.value(0).toString() << query.value(1).toString() << query.value(2).toString() << query.value(3).toString() << query.value(4).toString() << query.value(5).toString() << query.value(6).toString();
+			emit deviceParams(removeSimbols(query.value(0).toString()), removeSimbols(query.value(1).toString()), removeSimbols(query.value(2).toString()), removeSimbols(query.value(3).toString()), removeSimbols(query.value(4).toString()), removeSimbols(query.value(5).toString()), removeSimbols(query.value(6).toString()));
 		} while (query.next());
 	}
 
+	query.clear();
 	mw_db.close();
 
-	mw_db.removeDatabase(QSqlDatabase::defaultConnection);
-	resultBool = false;
+	emit showArray();
+}
+
+
+
+QString dataBaseCLass::removeSimbols(QString temp)
+{
+	temp.remove("\r");
+	temp.remove("\n");
+
+	return temp;
 }
