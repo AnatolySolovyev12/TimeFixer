@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <qdatetime.h>
 #include <QtEndian>
+#include <cstdlib>
 
 class TcpClientM2M : public QObject
 {
@@ -26,7 +27,7 @@ public:
 
 	void changeTimeM2M();
 	void exchangeFromTimer();
-	long checkDateTimeFromDevice(QString rxString);
+	void checkDateTimeFromDevice(QString rxString);
 
 
 signals:
@@ -51,7 +52,8 @@ private:
 	int reTransmitQuery = 0;
 	int counterForResend = 0;
 	int reConnectCounter = 0;
-	bool secondArtCommand = false;
-	bool artCycleFinished = false;
-	int typeDifferent = 0; // 0 - 900            9 - too much
+	int typeDifferent = 0; // 0 - -900    1 - +900   2 - -213   3 - +228   4 - -51   5 - +38     9 - too much
+	int codeForCorrect = 9;
+	bool dateLessCurr = false;
+	bool timeLessCurr = false;
 };

@@ -119,12 +119,7 @@ void TcpClientM2M::onReadyRead()
 	{
 		QString dateTaime = data.toHex();
 
-		if (checkDateTimeFromDevice(dateTaime) == 0)
-		{
-			counterForResend - 2;
-		}
-
-
+		checkDateTimeFromDevice(dateTaime);
 	}
 
 
@@ -167,56 +162,13 @@ void TcpClientM2M::stopConnectionWithHost()
 	socket->abort();
 }
 
-/*
-void TcpClientM2M::changeDateTime()
-{
-	if (artCycleFinished)
-		return;
-
-	if (counterForResend >= 6)
-	{
-		artCycleFinished = true;
-		counterForResend = 0;
-		reConnectCounter = 0;
-		secondArtCommand = false;
-		stopConnectionWithHost();
-
-		QTimer::singleShot(800, [this]() {
-			emit finish();
-			});
-
-		return;
-	}
-
-	if (socket->state() == QAbstractSocket::ConnectedState)
-	{
-		if (secondArtCommand)
-			sendMessage(QByteArray(modbusCRCforArtTime(QTime::currentTime().toString("HHmmss"))));
-		else
-			sendMessage(QByteArray(modbusCRCforArtDate(QDate::currentDate().toString("ddMMyy"))));
-
-		secondArtCommand = !secondArtCommand;
-
-		++counterForResend;
-
-		QTimer::singleShot(5000, [this]() {
-			changeTimeM2M();
-			});
-	}
-	else
-	{
-		qDebug() << '\n' << "TcpClientM2M::changeDateTime() -> Socket not open. Try reconnect.";
-		connectToSavedHost();
-	}
-}
-*/
 
 
 void TcpClientM2M::changeTimeM2M()
 {
 	if (counterForResend != 6)
 	{
-		QTimer::singleShot(500, [this]() {
+		QTimer::singleShot(50, [this]() {
 
 			if (counterForResend == 0)
 			{
@@ -236,14 +188,45 @@ void TcpClientM2M::changeTimeM2M()
 			if (counterForResend == 3)
 			{
 				sendMessage(QByteArray::fromHex(QByteArray("7EA01A022141763BA6E6E600C001C100080000010000FF0200601A7E")));// запрашиваем текущее время устройства
-
-
 			}
 
 			if (counterForResend == 4)
 			{
-				sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E")));//-900 - FC7C3CE9
+				qDebug() << "codeForCorrect " << codeForCorrect;
 
+
+				if (codeForCorrect != 9)
+				{
+					counterForResend--;
+					counterForResend--;
+				}
+				else
+					counterForResend++;
+
+				if (codeForCorrect == 0)
+				{
+					sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FC7C3CE97E"))); //+900
+				}
+				else if (codeForCorrect == 1)
+				{
+					sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF06011003843B6D7E"))); //-900
+				}
+				else if (codeForCorrect == 2)
+				{
+					sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF06011000D55F047E"))); //-213
+				}
+				else if (codeForCorrect == 3)
+				{
+					sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FF1C52A07E"))); //+228
+				}
+				else if (codeForCorrect == 4)
+				{
+					sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110003367867E"))); //-51
+				}
+				else if (codeForCorrect == 5)
+				{
+					sendMessage(QByteArray::fromHex(QByteArray("7EA01D02214176E796E6E600C301C100080000010000FF060110FF1C52A07E"))); //+38
+				}
 			}
 
 			if (counterForResend == 5)
@@ -272,8 +255,7 @@ void TcpClientM2M::changeTimeM2M()
 
 
 
-
-long TcpClientM2M::checkDateTimeFromDevice(QString rxString)
+void TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 {
 	QString temp = rxString;
 
@@ -311,14 +293,17 @@ long TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 	bool ok;
 	qDebug() << QString::number(year.toUInt(&ok, 16)) + '\-' + QString::number(month.toUInt(&ok, 16)) + '\-' + QString::number(day.toUInt(&ok, 16)) + "   " + QString::number(hour.toUInt(&ok, 16)) + '\:' + QString::number(minute.toUInt(&ok, 16)) + '\:' + QString::number(second.toUInt(&ok, 16));
 
-
-	QString fullDate = QString::number(year.toUInt(&ok, 16)) + '\-' + (QString::number(month.toUInt(&ok, 16)).length() != 1 ? QString::number(month.toUInt(&ok, 16)) : ("0" + QString::number(month.toUInt(&ok, 16)))) + '\-' + QString::number(day.toUInt(&ok, 16));
+	QString fullDate = QString::number(year.toUInt(&ok, 16)) + '\-' 
+		+ (QString::number(month.toUInt(&ok, 16)).length() != 1 ? QString::number(month.toUInt(&ok, 16)) : ("0" + QString::number(month.toUInt(&ok, 16)))) + '\-' 
+		+ (QString::number(day.toUInt(&ok, 16)).length() != 1 ? QString::number(day.toUInt(&ok, 16)) : ("0" + QString::number(day.toUInt(&ok, 16))));
 
 	qDebug() << "fullDate - " << QDate::fromString(fullDate, "yyyy-MM-dd").isValid() << fullDate;
 	qDebug() << "CurrDate - " << QDate::currentDate().isValid() << QDate::currentDate();
 
 
-	QString fullTime = QString::number(hour.toUInt(&ok, 16)) + '\:' + QString::number(minute.toUInt(&ok, 16)) + '\:' + QString::number(second.toUInt(&ok, 16));
+	QString fullTime = (QString::number(hour.toUInt(&ok, 16)).length() != 1 ? QString::number(hour.toUInt(&ok, 16)) : ("0" + QString::number(hour.toUInt(&ok, 16)))) + '\:'
+		+ (QString::number(minute.toUInt(&ok, 16)).length() != 1 ? QString::number(minute.toUInt(&ok, 16)) : ("0" + QString::number(minute.toUInt(&ok, 16)))) + '\:' 
+		+ (QString::number(second.toUInt(&ok, 16)).length() != 1 ? QString::number(second.toUInt(&ok, 16)) : ("0" + QString::number(second.toUInt(&ok, 16))));
 
 	qDebug() << "FullTime - " << QTime::fromString(fullTime).isValid() << QTime::fromString(fullTime);
 	qDebug() << "CurrTime - " << QTime::currentTime().isValid() << QTime::currentTime();
@@ -331,11 +316,43 @@ long TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 
 	long seconds = (QDate::fromString(fullDate, "yyyy-MM-dd").daysTo(QDate::currentDate()) * 86400) + QTime::fromString(fullTime).secsTo(QTime::currentTime());
 
-	if (seconds <= 50000)
+	dateLessCurr = (QDate::fromString(fullDate, "yyyy-MM-dd") < QDate::currentDate());
+	timeLessCurr = QTime::fromString(fullTime) < (QTime::currentTime());
+
+	if (!dateLessCurr || !timeLessCurr) 
 	{
-		if (seconds <= 900)
-			return 0;
+		codeForCorrect = 9; 
+		return;
+	}
+
+	if (abs(seconds) <= 50000)
+	{
+		if (abs(seconds) >= 900)
+		{
+			if (seconds < 0) codeForCorrect = 0;
+			if (seconds > 0) codeForCorrect = 1;
+		}
+		else if (abs(seconds) < 900)
+		{
+			if (abs(seconds) > 200)
+			{
+				if (seconds > 0) codeForCorrect = 2;
+				if (seconds < 0) codeForCorrect = 3;
+			}
+			else
+			{
+				if (abs(seconds) > 50)
+				{
+					if (seconds < 0) codeForCorrect = 5;
+					if (seconds > 0) codeForCorrect = 4;
+				}
+				else
+					codeForCorrect = 9;
+			}
+		}
+		else
+			codeForCorrect = 9;
 	}
 	else
-		return 9;
+		codeForCorrect = 9;
 }

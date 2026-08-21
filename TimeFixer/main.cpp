@@ -21,10 +21,10 @@ int main(int argc, char* argv[])
 	//listClassForHosts* hostsList = new listClassForHosts(nullptr);
 	
 	hostsFromDataBase* hostsDataBase = new hostsFromDataBase(nullptr);
-	dataBaseCLass* dBclass = new dataBaseCLass(nullptr);
+	//dataBaseCLass* dBclass = new dataBaseCLass(nullptr);
 
-	QObject::connect(dBclass, &dataBaseCLass::deviceParams, hostsDataBase, &hostsFromDataBase::pushHostInArr);
-	QObject::connect(dBclass, &dataBaseCLass::showArray, hostsDataBase, &hostsFromDataBase::showArray);
+	//QObject::connect(dBclass, &dataBaseCLass::deviceParams, hostsDataBase, &hostsFromDataBase::pushHostInArr);
+	//QObject::connect(dBclass, &dataBaseCLass::showArray, hostsDataBase, &hostsFromDataBase::showArray);
 
 	//dBclass->getDeviceParams();
 

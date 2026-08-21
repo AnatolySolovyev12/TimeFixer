@@ -5,7 +5,7 @@ hostsFromDataBase::hostsFromDataBase(QObject *parent)
 {
 	TcpClientM2M* test = new TcpClientM2M(); ///////
 
-	test->startConnectToHost("172.16.42.234", "8888");
+	test->startConnectToHost("172.16.53.243", "8888");
 }
 
 hostsFromDataBase::~hostsFromDataBase()
