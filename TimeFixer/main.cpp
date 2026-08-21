@@ -41,6 +41,6 @@ int main(int argc, char* argv[])
 		dBclass->getDeviceParams();
 
 		});
-
+		
 	return app.exec();
 }
