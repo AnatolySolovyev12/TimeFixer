@@ -54,6 +54,4 @@ private:
 	int reConnectCounter = 0;
 	int typeDifferent = 0; // 0 - -900    1 - +900   2 - -213   3 - +228   4 - -51   5 - +38     9 - too much
 	int codeForCorrect = 9;
-	bool dateLessCurr = false;
-	bool timeLessCurr = false;
 };

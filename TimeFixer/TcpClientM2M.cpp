@@ -27,7 +27,7 @@ TcpClientM2M::~TcpClientM2M()
 
 void TcpClientM2M::connectToSavedHost()
 {
-	
+
 	if (reConnectCounter >= 3)
 	{
 		counterForResend = 0;
@@ -73,9 +73,7 @@ void TcpClientM2M::sendMessage(const QByteArray& message)
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX " + temp << message.toHex();
 	}
 	else
-	{
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Not connected to host.";
-	}
 }
 
 
@@ -141,16 +139,12 @@ void TcpClientM2M::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString() << '\n';
 
-
-	if (socket->errorString().contains("Connection timed out") || socket->errorString().contains("Connection refused") || (socket->errorString().contains("The remote host closed the connection") && counterForResend >= 2))
-	{
-		counterForResend = 0;
-		reTransmitQuery = 0;
-		reConnectCounter = 0;
-
-		emit finish();
-	}
-
+	m_ip = "";
+	m_port = 0;
+	counterForResend = 0;
+	reTransmitQuery = 0;
+	reConnectCounter = 0;
+	emit finish();
 }
 
 
@@ -246,9 +240,12 @@ void TcpClientM2M::changeTimeM2M()
 	{
 		myTimer->stop();
 		socket->close();
-		reTransmitQuery = 0;
+
 		m_ip = "";
 		m_port = 0;
+		counterForResend = 0;
+		reTransmitQuery = 0;
+		reConnectCounter = 0;
 		emit finish();
 	}
 }
@@ -293,8 +290,8 @@ void TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 	bool ok;
 	qDebug() << QString::number(year.toUInt(&ok, 16)) + '\-' + QString::number(month.toUInt(&ok, 16)) + '\-' + QString::number(day.toUInt(&ok, 16)) + "   " + QString::number(hour.toUInt(&ok, 16)) + '\:' + QString::number(minute.toUInt(&ok, 16)) + '\:' + QString::number(second.toUInt(&ok, 16));
 
-	QString fullDate = QString::number(year.toUInt(&ok, 16)) + '\-' 
-		+ (QString::number(month.toUInt(&ok, 16)).length() != 1 ? QString::number(month.toUInt(&ok, 16)) : ("0" + QString::number(month.toUInt(&ok, 16)))) + '\-' 
+	QString fullDate = QString::number(year.toUInt(&ok, 16)) + '\-'
+		+ (QString::number(month.toUInt(&ok, 16)).length() != 1 ? QString::number(month.toUInt(&ok, 16)) : ("0" + QString::number(month.toUInt(&ok, 16)))) + '\-'
 		+ (QString::number(day.toUInt(&ok, 16)).length() != 1 ? QString::number(day.toUInt(&ok, 16)) : ("0" + QString::number(day.toUInt(&ok, 16))));
 
 	qDebug() << "fullDate - " << QDate::fromString(fullDate, "yyyy-MM-dd").isValid() << fullDate;
@@ -302,7 +299,7 @@ void TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 
 
 	QString fullTime = (QString::number(hour.toUInt(&ok, 16)).length() != 1 ? QString::number(hour.toUInt(&ok, 16)) : ("0" + QString::number(hour.toUInt(&ok, 16)))) + '\:'
-		+ (QString::number(minute.toUInt(&ok, 16)).length() != 1 ? QString::number(minute.toUInt(&ok, 16)) : ("0" + QString::number(minute.toUInt(&ok, 16)))) + '\:' 
+		+ (QString::number(minute.toUInt(&ok, 16)).length() != 1 ? QString::number(minute.toUInt(&ok, 16)) : ("0" + QString::number(minute.toUInt(&ok, 16)))) + '\:'
 		+ (QString::number(second.toUInt(&ok, 16)).length() != 1 ? QString::number(second.toUInt(&ok, 16)) : ("0" + QString::number(second.toUInt(&ok, 16))));
 
 	qDebug() << "FullTime - " << QTime::fromString(fullTime).isValid() << QTime::fromString(fullTime);
@@ -316,12 +313,9 @@ void TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 
 	long seconds = (QDate::fromString(fullDate, "yyyy-MM-dd").daysTo(QDate::currentDate()) * 86400) + QTime::fromString(fullTime).secsTo(QTime::currentTime());
 
-	dateLessCurr = (QDate::fromString(fullDate, "yyyy-MM-dd") < QDate::currentDate());
-	timeLessCurr = QTime::fromString(fullTime) < (QTime::currentTime());
-
-	if (!dateLessCurr || !timeLessCurr) 
+	if (!QTime::fromString(fullTime).isValid() || !QDate::fromString(fullDate, "yyyy-MM-dd").isValid())
 	{
-		codeForCorrect = 9; 
+		codeForCorrect = 9;
 		return;
 	}
 

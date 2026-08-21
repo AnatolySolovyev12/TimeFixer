@@ -5,6 +5,7 @@
 #include <iostream>
 #include <qdatetime.h>
 #include "TcpClientM2M.h"
+#include "QRegularExpression"
 
 class hostsFromDataBase : public QObject
 {
@@ -33,5 +34,6 @@ public:
 private:
 
 	QList<HostStruct>hostsArr;
+	QList<TcpClientM2M*>clientArr;
 };
 
