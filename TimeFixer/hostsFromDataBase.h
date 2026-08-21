@@ -2,9 +2,12 @@
 
 #include <QObject>
 #include <qdebug.h>
+#pragma once
+
 #include <iostream>
 #include <qdatetime.h>
 #include "TcpClientM2M.h"
+#include "TcpClientArt.h"
 #include "QRegularExpression"
 
 class hostsFromDataBase : public QObject
@@ -29,11 +32,12 @@ public:
 	void pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer);
 	void showArray();
 	void makeClients();
-
+	void clearAllArr();
 
 private:
 
 	QList<HostStruct>hostsArr;
-	QList<TcpClientM2M*>clientArr;
+	QList<TcpClientM2M*>clienArrM2M;
+	QList<TcpClientArt*>clientArrART;
 };
 

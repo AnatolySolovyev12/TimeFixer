@@ -3,21 +3,34 @@
 hostsFromDataBase::hostsFromDataBase(QObject* parent)
 	: QObject(parent)
 {
-	//TcpClientM2M* test = new TcpClientM2M(); ///////
 
-	//test->startConnectToHost("172.16.53.243", "8888");
 }
+
+
 
 hostsFromDataBase::~hostsFromDataBase()
 {
 }
 
 
+
+void hostsFromDataBase::clearAllArr()
+{
+	qDebug() << "\n\n\nClear all arrays with old client\n\n\n";
+	clienArrM2M.clear();
+	clientArrART.clear();
+	hostsArr.clear();
+}
+
+
+
 void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer)
 {
-	if (name.contains("М2М") || name.contains("M2M") && softVer.contains("1."))
+	// M2M - варианты с кириллицей и латиницей
+	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") || name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ"))
 		hostsArr.push_back(HostStruct{ name, ipPort, CSD, networkAddress, time, serial, softVer });
 }
+
 
 
 void hostsFromDataBase::showArray()
@@ -62,15 +75,31 @@ void hostsFromDataBase::makeClients()
 				portFromDbTelegram += val;
 		}
 
-		TcpClientM2M* temp = new TcpClientM2M();
+		if (val.s_name.contains("М2М") || val.s_name.contains("M2M"))
+		{
+			TcpClientM2M * temp = new TcpClientM2M();
 
-		connect(temp, &TcpClientM2M::finish, temp, [temp]() {
-			delete temp;
-			});
+			connect(temp, &TcpClientM2M::finish, temp, [temp]() {
+				delete temp;
+				});
 
-		clientArr.push_back(temp);
+			clienArrM2M.push_back(temp);
 
-		temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
+			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
+		}
+
+		if(val.s_name.contains("МАЯК-301") || val.s_name.contains("ПСЧ-3АРТ"))
+		{
+			TcpClientArt * temp = new TcpClientArt();
+
+			connect(temp, &TcpClientArt::finish, temp, [temp]() {
+				delete temp;
+				});
+
+			clientArrART.push_back(temp);
+
+			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
+		}
 	}
 }
 

@@ -1,4 +1,4 @@
-﻿
+﻿#pragma once
 
 #include <QObject>
 #include <QTcpSocket>
@@ -30,7 +30,6 @@ public:
 	void stopConnectionWithHost();
 
 	void changeTimeM2M();
-
 
 signals:
 	void messageReceived(const int64_t&);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QObject>
-
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
