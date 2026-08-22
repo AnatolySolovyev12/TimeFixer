@@ -60,7 +60,10 @@ bool listClassForHosts::readHostsFile(QList <QPair<QString, QString>>& temp)
 	qDebug() << temp;
 	qDebug() << "Count of Hosts = " << temp.length();
 
-	return true;
+	if (temp.length() > 0)
+		return true;
+	else 
+		return false;
 }
 
 
