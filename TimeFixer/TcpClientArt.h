@@ -34,7 +34,7 @@ public:
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
-	void finish();
+	void finishART();
 
 private slots:
 	void onConnected();

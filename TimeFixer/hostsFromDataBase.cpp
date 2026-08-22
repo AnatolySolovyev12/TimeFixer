@@ -27,7 +27,7 @@ void hostsFromDataBase::clearAllArr()
 void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer)
 {
 	// M2M - варианты с кириллицей и латиницей
-	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") || name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ"))
+	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") /*|| name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ")*/)
 		hostsArr.push_back(HostStruct{ name, ipPort, CSD, networkAddress, time, serial, softVer });
 }
 
@@ -77,29 +77,31 @@ void hostsFromDataBase::makeClients()
 
 		if (val.s_name.contains("М2М") || val.s_name.contains("M2M"))
 		{
-			TcpClientM2M * temp = new TcpClientM2M();
+			TcpClientM2M* temp = new TcpClientM2M();
 
 			connect(temp, &TcpClientM2M::finish, temp, [temp]() {
-				delete temp;
+				if (temp != nullptr)
+					delete temp;
 				});
 
 			clienArrM2M.push_back(temp);
 
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
 		}
-
-		if(val.s_name.contains("МАЯК-301") || val.s_name.contains("ПСЧ-3АРТ"))
+		/*
+		if (val.s_name.contains("МАЯК-301") || val.s_name.contains("ПСЧ-3АРТ"))
 		{
-			TcpClientArt * temp = new TcpClientArt();
+			TcpClientArt* temp = new TcpClientArt();
 
-			connect(temp, &TcpClientArt::finish, temp, [temp]() {
-				delete temp;
+			connect(temp, &TcpClientArt::finishART, temp, [temp]() {
+				if (temp != nullptr)
+					delete temp;
 				});
 
 			clientArrART.push_back(temp);
 
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
-		}
+		}*/
 	}
 }
 

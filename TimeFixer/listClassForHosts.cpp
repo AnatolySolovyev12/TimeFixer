@@ -69,7 +69,7 @@ void listClassForHosts::initializeFunc()
 {
 	host = new TcpClientArt();
 
-	connect(host, &TcpClientArt::finish, this, [this]() {
+	connect(host, &TcpClientArt::finishART, this, [this]() {
 
 		++counterHost;
 		QTimer::singleShot(1000, [this]() { switchToNextHost(); });

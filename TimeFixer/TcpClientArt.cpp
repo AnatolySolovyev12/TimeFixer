@@ -113,7 +113,7 @@ void TcpClientArt::onErrorOccurred(QAbstractSocket::SocketError socketError)
 		counterForResend = 0;
 		reConnectCounter = 0;
 		secondArtCommand = false;
-		emit finish();
+		emit finishART();
 	}
 }
 
@@ -194,7 +194,7 @@ void TcpClientArt::changeDateTime()
 		stopConnectionWithHost();
 
 		QTimer::singleShot(800, [this]() {
-			emit finish();
+			emit finishART();
 			});
 
 		return;
