@@ -30,12 +30,10 @@ void TcpClientM2M::connectToSavedHost()
 
 	if (reConnectCounter >= 3)
 	{
-		m_ip = "";
-		m_port = 0;
 		counterForResend = 0;
 		reTransmitQuery = 0;
 		reConnectCounter = 0;
-		emit finish();
+		emit finishM2M();
 	}
 	else
 	{
@@ -105,26 +103,12 @@ void TcpClientM2M::onReadyRead()
 
 	qDebug() << "RX << " << data.toHex();
 
-
-	/*
-	if (data.toHex().length() < 35 && (serialStringForProtocol == "]101" || serialStringForProtocol == "]103" || serialStringForProtocol == "]102" || serialStringForProtocol == "]104" || serialStringForProtocol == "]106" || serialStringForProtocol == "]109") && counterForResend >= 2)
-	{
-		qDebug() << "\nincorrect RX. Resend";
-		reTransmitQuery++;
-		myTimer->stop();
-		getDaily();
-		return;
-	}
-	*/
-
-
-	if (counterForResend == 3) ////////////////// тут нужны правки
+	if (counterForResend == 3)
 	{
 		QString dateTaime = data.toHex();
 
 		checkDateTimeFromDevice(dateTaime);
 	}
-
 
 	myTimer->stop();
 	counterForResend++;
@@ -151,16 +135,16 @@ void TcpClientM2M::onErrorOccurred(QAbstractSocket::SocketError socketError)
 	{
 		++reConnectCounter;
 		connectToSavedHost();
+		qDebug() << '\n' << "TcpClientM2M::onErrorOccurred() -> Socket not open. Try reconnect.";
+
 		return;
 	}
 	else
 	{
-		m_ip = "";
-		m_port = 0;
 		counterForResend = 0;
 		reTransmitQuery = 0;
 		reConnectCounter = 0;
-		emit finish();
+		emit finishM2M();
 	}
 }
 
@@ -259,12 +243,10 @@ void TcpClientM2M::changeTimeM2M()
 		myTimer->stop();
 		socket->close();
 
-		m_ip = "";
-		m_port = 0;
 		counterForResend = 0;
 		reTransmitQuery = 0;
 		reConnectCounter = 0;
-		emit finish();
+		emit finishM2M();
 	}
 }
 

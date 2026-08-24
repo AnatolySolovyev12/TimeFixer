@@ -20,6 +20,7 @@ void hostsFromDataBase::clearAllArr()
 	clienArrM2M.clear();
 	clientArrART.clear();
 	hostsArr.clear();
+	clientArrMIR.clear();
 }
 
 
@@ -27,7 +28,7 @@ void hostsFromDataBase::clearAllArr()
 void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer)
 {
 	// M2M - варианты с кириллицей и латиницей
-	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") || name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ"))
+	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") || name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ") || name.contains("МИР") || name.contains("С-04") || name.contains("С-05") || name.contains("С-07") || name.contains("C-04") || name.contains("C-05") || name.contains("C-07") || name.contains("481687") || name.contains("478212") || name.contains("464363") || name.contains("479687") || name.contains("494591"))
 		hostsArr.push_back(HostStruct{ name, ipPort, CSD, networkAddress, time, serial, softVer });
 }
 
@@ -79,7 +80,7 @@ void hostsFromDataBase::makeClients()
 		{
 			TcpClientM2M* temp = new TcpClientM2M();
 
-			connect(temp, &TcpClientM2M::finish, [temp]() {
+			connect(temp, &TcpClientM2M::finishM2M, [temp]() {
 				if (temp != nullptr)
 				{
 					disconnect(temp, nullptr, nullptr, nullptr);
@@ -110,7 +111,23 @@ void hostsFromDataBase::makeClients()
 
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
 		}
+
+		if(val.s_name.contains("МИР") || val.s_name.contains("С-04") || val.s_name.contains("С-05") || val.s_name.contains("С-07") || val.s_name.contains("C-04") || val.s_name.contains("C-05") || val.s_name.contains("C-07") || val.s_name.contains("481687") || val.s_name.contains("478212") || val.s_name.contains("464363") || val.s_name.contains("479687") || val.s_name.contains("494591"))
+		{
+			TcpClientMIR* temp = new TcpClientMIR();
+
+			connect(temp, &TcpClientMIR::finishMIR, [temp]() {
+				if (temp != nullptr)
+				{
+					disconnect(temp, nullptr, nullptr, nullptr);
+					temp->stopConnectionWithHost();
+					temp->deleteLater();
+				}
+				});
+
+			clientArrMIR.push_back(temp);
+
+			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
+		}
 	}
 }
-
-

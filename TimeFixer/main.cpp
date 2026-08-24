@@ -2,7 +2,6 @@
 #include <listClassForHosts.h>
 #include "dataBaseCLass.h"
 #include "hostsFromDataBase.h"
-
 #include <Windows.h>
 #include <clocale>
 #include <iostream>
@@ -19,7 +18,7 @@ int main(int argc, char* argv[])
 	QTimer* regularTimer = new QTimer();
 
 	QCoreApplication app(argc, argv);
-
+	
 	listClassForHosts* hostsList = new listClassForHosts(nullptr);
 	
 	hostsFromDataBase* hostsDataBase = new hostsFromDataBase(nullptr);

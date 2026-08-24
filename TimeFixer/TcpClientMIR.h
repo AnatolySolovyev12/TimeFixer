@@ -1,4 +1,4 @@
-﻿#pragma once
+
 
 #include <QObject>
 #include <QTcpSocket>
@@ -8,33 +8,36 @@
 #include <windows.h>
 #include <qdatetime.h>
 #include <QtEndian>
+#include <cstdlib>
 
-class TcpClientArt : public QObject
+class TcpClientMIR : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit TcpClientArt(QObject* parent = nullptr);
+	explicit TcpClientMIR(QObject* parent = nullptr);
 
-	~TcpClientArt();
+	~TcpClientMIR();
 
 	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
 
 	void startConnectToHost(QString any, QString port);
-
-
-	void changeDateTime();
-	QByteArray modbusCRCforArtTime(QString temp);
-	QByteArray modbusCRCforArtDate(QString temp);
 	void stopConnectionWithHost();
 
-	void changeTimeM2M();
+	void changeTimeMIR();
+	void exchangeFromTimer();
+	void checkDateTimeFromDevice(QString rxString);
+	QByteArray createDateTimeForDevice();
+	quint16 calculateCRC16(const QByteArray& data);
+	QByteArray createPacket(const QByteArray& data);
+
+
 
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
-	void finishART();
+	void finishMIR();
 
 private slots:
 	void onConnected();
@@ -47,11 +50,13 @@ private:
 	QTimer* myTimer = nullptr;
 	QString m_ip = "";
 	QString m_port = "";
-	
+	QString dateForProtocol;
+	QString timeForProtocol;
+
+
 	bool connectedState = false;
 	int reTransmitQuery = 0;
 	int counterForResend = 0;
 	int reConnectCounter = 0;
-	bool secondArtCommand = false;
-	bool artCycleFinished = false;
+
 };

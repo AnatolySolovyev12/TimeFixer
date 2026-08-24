@@ -8,6 +8,7 @@
 #include <qdatetime.h>
 #include "TcpClientM2M.h"
 #include "TcpClientArt.h"
+#include "TcpClientMIR.h"
 #include "QRegularExpression"
 
 class hostsFromDataBase : public QObject
@@ -39,5 +40,6 @@ private:
 	QList<HostStruct>hostsArr;
 	QList<TcpClientM2M*>clienArrM2M;
 	QList<TcpClientArt*>clientArrART;
+	QList<TcpClientMIR*>clientArrMIR;
 };
 

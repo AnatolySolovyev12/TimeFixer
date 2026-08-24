@@ -33,7 +33,7 @@ public:
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
-	void finish();
+	void finishM2M();
 
 private slots:
 	void onConnected();
@@ -46,7 +46,6 @@ private:
 	QTimer* myTimer = nullptr;
 	QString m_ip = "";
 	QString m_port = "";
-	QString serialStringForProtocol;
 
 	bool connectedState = false;
 	int reTransmitQuery = 0;
