@@ -319,7 +319,7 @@ void TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 		return;
 	}
 
-	if (abs(seconds) <= 100000)
+	if (abs(seconds) <= 350000)
 	{
 		if (abs(seconds) >= 900)
 		{

@@ -79,29 +79,37 @@ void hostsFromDataBase::makeClients()
 		{
 			TcpClientM2M* temp = new TcpClientM2M();
 
-			connect(temp, &TcpClientM2M::finish, temp, [temp]() {
+			connect(temp, &TcpClientM2M::finish, [temp]() {
 				if (temp != nullptr)
-					delete temp;
+				{
+					disconnect(temp, nullptr, nullptr, nullptr);
+					temp->stopConnectionWithHost();
+					temp->deleteLater();
+				}
 				});
 
 			clienArrM2M.push_back(temp);
 
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
 		}
-		/*
+		
 		if (val.s_name.contains("МАЯК-301") || val.s_name.contains("ПСЧ-3АРТ"))
 		{
 			TcpClientArt* temp = new TcpClientArt();
 
-			connect(temp, &TcpClientArt::finishART, temp, [temp]() {
+			connect(temp, &TcpClientArt::finishART, [temp]() {
 				if (temp != nullptr)
-					delete temp;
+				{
+					disconnect(temp, nullptr, nullptr, nullptr);
+					temp->stopConnectionWithHost();
+					temp->deleteLater();
+				}
 				});
 
 			clientArrART.push_back(temp);
 
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
-		}*/
+		}
 	}
 }
 
