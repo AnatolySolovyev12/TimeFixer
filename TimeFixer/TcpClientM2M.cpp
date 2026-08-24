@@ -73,7 +73,7 @@ void TcpClientM2M::sendMessage(const QByteArray& message)
 	{
 		socket->write(message);
 		QString temp = '(' + QString::number(counterForResend) + ") >> ";
-		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX " + temp << message.toHex();
+		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX (" + m_ip + ')' + temp << message.toHex();
 	}
 	else
 		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Not connected to host.";
@@ -101,7 +101,7 @@ void TcpClientM2M::onReadyRead()
 {
 	QByteArray data = socket->readAll();
 
-	qDebug() << "RX << " << data.toHex();
+	qDebug() << "RX (" + m_ip + ") << " << data.toHex();
 
 	if (counterForResend == 3)
 	{

@@ -68,7 +68,7 @@ void TcpClientArt::sendMessage(const QByteArray& message)
 	{
 		socket->write(message);
 		QString temp = '(' + QString::number(counterForResend+1) + ") >> ";
-		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX " + temp << message.toHex();
+		qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "TX (" + m_ip + ')' + temp << message.toHex();
 	}
 	else
 	{
@@ -98,7 +98,7 @@ void TcpClientArt::onReadyRead()
 {
 	QByteArray data = socket->readAll();
 
-	qDebug() << "RX << " << data.toHex();
+	qDebug() << "RX (" + m_ip + ") << " << data.toHex();
 }
 
 
