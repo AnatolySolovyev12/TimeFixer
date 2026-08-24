@@ -27,7 +27,7 @@ void hostsFromDataBase::clearAllArr()
 void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer)
 {
 	// M2M - варианты с кириллицей и латиницей
-	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") /*|| name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ")*/)
+	if (name.contains("М2М") && softVer.contains("1.") || name.contains("M2M") && softVer.contains("1.") || name.contains("МАЯК-301") || name.contains("ПСЧ-3АРТ"))
 		hostsArr.push_back(HostStruct{ name, ipPort, CSD, networkAddress, time, serial, softVer });
 }
 

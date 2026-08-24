@@ -30,9 +30,12 @@ void TcpClientM2M::connectToSavedHost()
 
 	if (reConnectCounter >= 3)
 	{
+		m_ip = "";
+		m_port = 0;
 		counterForResend = 0;
+		reTransmitQuery = 0;
 		reConnectCounter = 0;
-		stopConnectionWithHost();
+		emit finish();
 	}
 	else
 	{
@@ -42,10 +45,12 @@ void TcpClientM2M::connectToSavedHost()
 
 			reConnectCounter++;
 
-			if (socket->state() == QAbstractSocket::UnconnectedState) {
+			if (socket->state() == QAbstractSocket::UnconnectedState) 
+			{
 				socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
 			}
-			else {
+			else 
+			{
 				socket->abort();
 				socket->connectToHost(QHostAddress(m_ip), m_port.toInt());
 			}
@@ -165,7 +170,8 @@ void TcpClientM2M::stopConnectionWithHost()
 {
 	qDebug() << '\n' << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Try disconnect from host " << QHostAddress(m_ip).toString() << "\n";
 
-	socket->abort();
+	if (socket->state() == QAbstractSocket::ConnectedState)
+		socket->abort();
 }
 
 
