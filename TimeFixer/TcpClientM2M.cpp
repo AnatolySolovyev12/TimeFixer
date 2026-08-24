@@ -128,23 +128,35 @@ void TcpClientM2M::onReadyRead()
 	changeTimeM2M();
 }
 
+
+
 void TcpClientM2M::exchangeFromTimer()
 {
 	++reTransmitQuery;
-
 	changeTimeM2M();
 }
+
+
 
 void TcpClientM2M::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "\n" << QDateTime::currentDateTime().toString("dd.MM.yyyy - hh.mm.ss - ") << "Socket error:" << socketError << socket->errorString() << '\n';
 
-	m_ip = "";
-	m_port = 0;
-	counterForResend = 0;
-	reTransmitQuery = 0;
-	reConnectCounter = 0;
-	emit finish();
+	if (socket->errorString().contains("The remote host closed the connection"))
+	{
+		++reConnectCounter;
+		connectToSavedHost();
+		return;
+	}
+	else
+	{
+		m_ip = "";
+		m_port = 0;
+		counterForResend = 0;
+		reTransmitQuery = 0;
+		reConnectCounter = 0;
+		emit finish();
+	}
 }
 
 
