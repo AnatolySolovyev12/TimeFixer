@@ -88,7 +88,7 @@ void listClassForHosts::switchToNextHost()
 {
 	if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
 	{
-		QTimer::singleShot(20000000, [this]()
+		QTimer::singleShot(20000000, [this]() // 86400000 - сутки, 21600000 - 6 часов
 			{
 				counterHost = 0;
 				qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
