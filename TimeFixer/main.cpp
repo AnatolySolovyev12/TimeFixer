@@ -14,16 +14,15 @@
 #include <QMainWindow>
 
 
-
-
-
+QTimer* regularTimer = nullptr;
 QSystemTrayIcon* trayIcon = nullptr;
+listClassForHosts* hostsList = nullptr;
 
 void iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
 	if (reason == QSystemTrayIcon::ActivationReason::DoubleClick) // требуется корректировка вывода часов переведённых в сутки или в часах свыше 24
 	{
-		trayIcon->showMessage("Test title", "testtesttest", QSystemTrayIcon::Information, 5000);
+		trayIcon->showMessage("Next start:",  "hostsDataBase: " + QTime::currentTime().addSecs(regularTimer->remainingTime() / 1000).toString() + '\n' + "listClassForHosts: " + hostsList->returnTimeToNextCycle(), QSystemTrayIcon::Information, 5000);
 	}
 }
 
@@ -54,7 +53,7 @@ int main(int argc, char* argv[])
 	SetConsoleOutputCP(65001);  // UTF‑8 вывод
 	setlocale(LC_ALL, "ru_RU.UTF-8");
 
-	QTimer* regularTimer = new QTimer();
+	regularTimer = new QTimer();
 
 	QApplication app(argc, argv); // QCoreApplication - не используем если используется QWidget
 
@@ -74,7 +73,7 @@ int main(int argc, char* argv[])
 	QObject::connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
 	QObject::connect(trayIcon, &QSystemTrayIcon::activated, &iconActivated);
 	
-	listClassForHosts* hostsList = new listClassForHosts(nullptr);
+	hostsList = new listClassForHosts(nullptr);
 	hostsFromDataBase* hostsDataBase = new hostsFromDataBase(nullptr);
 	dataBaseCLass* dBclass = new dataBaseCLass(nullptr);
 

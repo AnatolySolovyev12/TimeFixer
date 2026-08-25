@@ -15,11 +15,12 @@ public:
 	bool readHostsFile(QList <QPair<QString, QString>>& temp);
 	void initializeFunc();
 	void switchToNextHost();
-
+	QString returnTimeToNextCycle();
 
 private:
 	QList <QPair<QString, QString>>hostArr;
 	int counterHost = 0;
 	TcpClientArt* host;
+	QString timeToNextCycle = "";
 };
 
