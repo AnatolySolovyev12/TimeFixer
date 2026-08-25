@@ -10,14 +10,14 @@
 #include <QtEndian>
 #include <cstdlib>
 
-class TcpClientM2M : public QObject
+class TcpClientMercury : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit TcpClientM2M(QObject* parent = nullptr);
+	explicit TcpClientMercury(QString serial, QObject* parent = nullptr);
 
-	~TcpClientM2M();
+	~TcpClientMercury();
 
 	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
@@ -25,15 +25,18 @@ public:
 	void startConnectToHost(QString any, QString port);
 	void stopConnectionWithHost();
 
-	void changeTimeM2M();
+	void changeTimeMercury();
 	void exchangeFromTimer();
 	void checkDateTimeFromDevice(QString rxString);
+	quint16 calculateCRC16(const QByteArray& data);
+	QByteArray createPacket(const QByteArray& data);
+
 
 
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
-	void finishM2M();
+	void finishMercury();
 
 private slots:
 	void onConnected();
@@ -46,11 +49,13 @@ private:
 	QTimer* myTimer = nullptr;
 	QString m_ip = "";
 	QString m_port = "";
+	QString m_serial = 0;
+	QString dateForProtocol;
+	QString timeForProtocol;
+
 
 	bool connectedState = false;
 	int reTransmitQuery = 0;
 	int counterForResend = 0;
 	int reConnectCounter = 0;
-	int typeDifferent = 0; // 0 - -900    1 - +900   2 - -213   3 - +228   4 - -51   5 - +38     9 - too much
-	int codeForCorrect = 9;
 };

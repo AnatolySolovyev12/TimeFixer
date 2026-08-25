@@ -9,6 +9,7 @@
 #include "TcpClientM2M.h"
 #include "TcpClientArt.h"
 #include "TcpClientMIR.h"
+#include "TcpClientMercury.h"
 #include "QRegularExpression"
 
 class hostsFromDataBase : public QObject
@@ -41,5 +42,6 @@ private:
 	QList<TcpClientM2M*>clienArrM2M;
 	QList<TcpClientArt*>clientArrART;
 	QList<TcpClientMIR*>clientArrMIR;
+	QList<TcpClientMercury*>clientArrMercury;
 };
 

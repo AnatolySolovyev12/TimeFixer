@@ -67,6 +67,7 @@
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
     <ClCompile Include="TcpClientM2M.cpp" />
+    <ClCompile Include="TcpClientMercury.cpp" />
     <ClCompile Include="TcpClientMIR.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +92,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="resource1.h" />
     <ClInclude Include="resource2.h" />
+    <QtMoc Include="TcpClientMercury.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TimeFixer.rc" />

@@ -44,6 +44,9 @@
     <ClCompile Include="TcpClientMIR.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TcpClientMercury.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TcpClientArt.h">
@@ -62,6 +65,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="TcpClientMIR.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TcpClientMercury.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
