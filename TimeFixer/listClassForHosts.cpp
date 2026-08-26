@@ -93,7 +93,7 @@ void listClassForHosts::switchToNextHost()
 				counterHost = 0;
 				qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
 				host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-				timeToNextCycle = "isNow";
+				timeToNextCycle = QTime::currentTime().addSecs(20000000 / 1000).toString();
 			});
 
 		timeToNextCycle = QTime::currentTime().addSecs(20000000 / 1000).toString();
