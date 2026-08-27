@@ -29,7 +29,7 @@ void hostsFromDataBase::clearAllArr()
 void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer)
 {
 	// Дубликаты условий -  варианты с кириллицей и латиницей
-	if (serial.contains("101000") && softVer.contains("1.") || serial.contains("102000") && softVer.contains("1.") || serial.contains("103000") && softVer.contains("1.") 
+	if ((serial.contains("101000") && softVer.contains("1.") || serial.contains("102000") && softVer.contains("1.") || serial.contains("103000") && softVer.contains("1.") 
 		|| serial.contains("104000") && softVer.contains("1.") || serial.contains("106000") && softVer.contains("1.") || serial.contains("109000") && softVer.contains("1.") 
 		|| serial.contains("109000") && softVer.contains("2.")
 
@@ -44,7 +44,11 @@ void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD,
 		|| serial.contains("481687") || serial.contains("478212") || serial.contains("464363") || serial.contains("479687") || serial.contains("494591")
 		|| serial.contains("464365") || serial.contains("465114")
 
-		|| (name.contains("Меркурий") || name.contains("М204") || name.contains("M204") || name.contains("М203") || name.contains("M203") || name.contains("M-234") || name.contains("М-234")) && CSD.isEmpty()
+		|| name.contains("Меркурий") || name.contains("М204") || name.contains("M204") || name.contains("М203") || name.contains("M203") || name.contains("M-234") || name.contains("М-234")
+			
+		|| name.contains("ПСЧ-4ТМ") || name.contains("ПСЧ-3ТМ") || name.contains("СЭТ-4ТМ") || name.contains("СЭТ-3ТМ"))  
+		
+		&& CSD.isEmpty()
 		
 		)
 
@@ -170,6 +174,24 @@ void hostsFromDataBase::makeClients()
 				});
 
 			clientArrMercury.push_back(temp);
+
+			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
+		}
+
+		if (val.s_name.contains("ПСЧ-4ТМ") || val.s_name.contains("ПСЧ-3ТМ") || val.s_name.contains("СЭТ-4ТМ") || val.s_name.contains("СЭТ-3ТМ"))
+		{
+			TcpClientNZIF* temp = new TcpClientNZIF(val.s_networkAddress);
+
+			connect(temp, &TcpClientNZIF::finishNZIF, [temp]() {
+				if (temp != nullptr)
+				{
+					disconnect(temp, nullptr, nullptr, nullptr);
+					temp->stopConnectionWithHost();
+					temp->deleteLater();
+				}
+				});
+
+			clientArrNZIF.push_back(temp);
 
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
 		}

@@ -13,7 +13,6 @@
 #include <QAction>
 #include <QMainWindow>
 
-
 QTimer* regularTimer = nullptr;
 QSystemTrayIcon* trayIcon = nullptr;
 listClassForHosts* hostsList = nullptr;

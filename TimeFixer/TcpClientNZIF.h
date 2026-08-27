@@ -10,14 +10,14 @@
 #include <QtEndian>
 #include <cstdlib>
 
-class TcpClientMercury : public QObject
+class TcpClientNZIF : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit TcpClientMercury(QString serial, QObject* parent = nullptr);
+	explicit TcpClientNZIF(QString serial, QObject* parent = nullptr);
 
-	~TcpClientMercury();
+	~TcpClientNZIF();
 
 	void connectToSavedHost();
 	void sendMessage(const QByteArray& message);
@@ -25,16 +25,18 @@ public:
 	void startConnectToHost(QString any, QString port);
 	void stopConnectionWithHost();
 
-	void changeTimeMercury();
+	void changeTimeNZIF();
 	void exchangeFromTimer();
 	void checkDateTimeFromDevice(QString rxString);
 	quint16 calculateCRC16(const QByteArray& data);
 	QByteArray createPacket(const QByteArray& data);
 
+
+
 signals:
 	void messageReceived(const int64_t&);
 	void messageError();
-	void finishMercury();
+	void finishNZIF();
 
 private slots:
 	void onConnected();
@@ -50,6 +52,9 @@ private:
 	QString m_serial = 0;
 	QString dateForProtocol;
 	QString timeForProtocol;
+
+	bool read = false;
+	bool write = true;
 
 	bool connectedState = false;
 	int reTransmitQuery = 0;

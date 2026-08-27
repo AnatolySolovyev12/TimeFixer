@@ -47,6 +47,9 @@
     <ClCompile Include="TcpClientMercury.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TcpClientNZIF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TcpClientArt.h">
@@ -68,6 +71,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="TcpClientMercury.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="TcpClientNZIF.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
