@@ -6,6 +6,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QCoreApplication>
+#include <Windows.h>
 
 
 class dataBaseCLass  : public QObject

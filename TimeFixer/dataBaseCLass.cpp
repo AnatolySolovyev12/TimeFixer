@@ -3,6 +3,7 @@
 dataBaseCLass::dataBaseCLass(QObject* parent)
 	: QObject(parent)
 {
+	AttachConsole(ATTACH_PARENT_PROCESS);
 }
 
 

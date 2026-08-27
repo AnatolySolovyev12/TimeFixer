@@ -3,6 +3,8 @@
 listClassForHosts::listClassForHosts(QObject *parent)
 	: QObject(parent)
 {
+	AttachConsole(ATTACH_PARENT_PROCESS);
+
 	if (readHostsFile(hostArr))
 		initializeFunc();
 }
