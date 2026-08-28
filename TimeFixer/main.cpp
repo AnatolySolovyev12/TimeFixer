@@ -12,10 +12,14 @@
 #include <QMenu>
 #include <QAction>
 #include <QMainWindow>
+#include <QInputDialog>
+//#include <qwidget.h>
 
 QTimer* regularTimer = nullptr;
 QSystemTrayIcon* trayIcon = nullptr;
 listClassForHosts* hostsList = nullptr;
+hostsFromDataBase* hostsDataBase = nullptr;
+dataBaseCLass* dBclass = nullptr;
 
 void iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
@@ -46,6 +50,24 @@ void cmdClose()
 
 
 
+void resetTimerForDbHosts()
+{
+	qDebug() << "\nTimer for DB Hosts was reset.";
+	regularTimer->start(); // 86400000 - сутки, 21600000 - 6 часов
+}
+
+
+
+void setMaxSecondsM2M()
+{
+	bool ok = true;
+	int maxSeconds = QInputDialog::getInt(nullptr, "Set value", "Set Max seconds for start update time:", 320000, 60, 1000000, 10, &ok);
+
+	qDebug() << maxSeconds;
+}
+
+
+
 int main(int argc, char* argv[])
 {
 	SetConsoleCP(65001);        // UTF‑8 вход
@@ -55,32 +77,36 @@ int main(int argc, char* argv[])
 	regularTimer = new QTimer();
 
 	QApplication app(argc, argv); // QCoreApplication - не используем если используется QWidget
-
+	app.setQuitOnLastWindowClosed(false);
 	trayIcon = new QSystemTrayIcon();
 	trayIcon->setIcon(QIcon(QCoreApplication::applicationDirPath() + "\\icon.png"));
 
 	QMenu* menu = new QMenu();
-	QAction* restoreAction = menu->addAction("CMD open and connect");
-	QAction* restoreActionHide = menu->addAction("CMD disconnect");
+	QAction* restoreActionOpenCLI = menu->addAction("CMD open and connect");
+	QAction* restoreActionHideCLI = menu->addAction("CMD disconnect");
+	QAction* restoreActionRestartDbHosts = menu->addAction("Restart updateTime for DB Hosts");
+	QAction* restoreSetMaxSecondsM2M = menu->addAction("Set Max second for M2M");
 	QAction* quitAction = menu->addAction("Exit");
 
 	trayIcon->setContextMenu(menu);
 	trayIcon->setVisible(true);
 
-	QObject::connect(restoreAction, &QAction::triggered, &cmdOpen);
-	QObject::connect(restoreActionHide, &QAction::triggered, &cmdClose);
+	QObject::connect(restoreActionOpenCLI, &QAction::triggered, &cmdOpen);
+	QObject::connect(restoreActionHideCLI, &QAction::triggered, &cmdClose);
+	QObject::connect(restoreActionRestartDbHosts, &QAction::triggered, &resetTimerForDbHosts);
+	QObject::connect(restoreSetMaxSecondsM2M, &QAction::triggered,[]() {setMaxSecondsM2M();});
 	QObject::connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
 	QObject::connect(trayIcon, &QSystemTrayIcon::activated, &iconActivated);
 	
 	hostsList = new listClassForHosts(nullptr);
-	hostsFromDataBase* hostsDataBase = new hostsFromDataBase(nullptr);
-	dataBaseCLass* dBclass = new dataBaseCLass(nullptr);
+	hostsDataBase = new hostsFromDataBase(nullptr);
+	dBclass = new dataBaseCLass(nullptr);
 
 	QObject::connect(dBclass, &dataBaseCLass::deviceParams, hostsDataBase, &hostsFromDataBase::pushHostInArr);
 	QObject::connect(dBclass, &dataBaseCLass::showArray, hostsDataBase, &hostsFromDataBase::showArray);
 
 	hostsDataBase->clearAllArr();
-	dBclass->getDeviceParams();
+	//dBclass->getDeviceParams();
 
 	// Регулярные запуски
 
