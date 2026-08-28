@@ -4,6 +4,7 @@ dataBaseCLass::dataBaseCLass(QObject* parent)
 	: QObject(parent)
 {
 	AttachConsole(ATTACH_PARENT_PROCESS);
+	readDataBaseFile();
 }
 
 
@@ -21,7 +22,7 @@ void dataBaseCLass::connectDataBase()
 
 	mw_db = QSqlDatabase::addDatabase("QODBC", "TimeFixerConnection");
 
-	mw_db.setDatabaseName("DRIVER={SQL Server};SERVER=10.86.142.14;DATABASE=ProSoft_ASKUE;UID=solexp;PWD=RootToor#;");
+	mw_db.setDatabaseName("DRIVER={SQL Server};SERVER=" + host + ";DATABASE=" + dataBase + ";UID=" + login + ";PWD=" + pass + ";");
 
 	if (!mw_db.open())
 	{
@@ -114,4 +115,56 @@ QString dataBaseCLass::removeSimbols(QString temp)
 	temp.remove("\n");
 
 	return temp;
+}
+
+
+
+bool dataBaseCLass::readDataBaseFile()
+{
+	QFile file(QCoreApplication::applicationDirPath() + "\\dataBase.txt");
+
+	if (!file.open(QIODevice::ReadOnly))
+	{
+		qDebug() << "Don't find dataBase file. Create file and try again";
+		return false;
+	}
+
+	QTextStream out(&file);
+
+	QString* myLine = new QString();
+
+	int counter = 0;
+
+	while (out.readLineInto(myLine, 0))
+	{
+		switch (counter)
+		{
+		case(0):
+		{
+			host = *myLine;
+			break;
+		}
+		case(1):
+		{
+			dataBase = *myLine;
+			break;
+		}
+		case(2): 
+		{
+			login = *myLine;
+			break;
+		}
+		case(3):
+		{
+			pass = *myLine;
+			break;
+		}
+		}
+
+		++counter;
+	}
+
+	delete myLine;
+	myLine = nullptr;
+	file.close();
 }

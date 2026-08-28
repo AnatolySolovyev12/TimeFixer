@@ -7,7 +7,7 @@
 #include <QSqlRecord>
 #include <QCoreApplication>
 #include <Windows.h>
-
+#include <QFile>
 
 class dataBaseCLass  : public QObject
 {
@@ -20,6 +20,7 @@ public:
 	void connectDataBase();
 	void getDeviceParams();
 	QString removeSimbols(QString temp);
+	bool readDataBaseFile();
 
 signals:
 	void deviceParams(QString name, QString ipPort, QString CSD, QString networkAddress, QString time, QString serial, QString softVer);
@@ -27,4 +28,8 @@ signals:
 
 private:
 	QSqlDatabase mw_db;
+	QString host = "";
+	QString dataBase = "";
+	QString login = "";
+	QString pass = "";
 };
