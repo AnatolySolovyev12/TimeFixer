@@ -76,7 +76,7 @@ void listClassForHosts::initializeFunc()
 
 	restartTimer = new QTimer();
 
-	connect(restartTimer, &QTimer::timeout, this, &listClassForHosts::returnTimeToNextCycle);
+	connect(restartTimer, &QTimer::timeout, this, &listClassForHosts::restartCycleFunc);
 
 	connect(host, &TcpClientArt::finishART, this, [this]() {
 
