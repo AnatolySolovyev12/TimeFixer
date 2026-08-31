@@ -1,6 +1,6 @@
-#include "dataBaseCLass.h"
+#include "dataBaseClass.h"
 
-dataBaseCLass::dataBaseCLass(QObject* parent)
+dataBaseClass::dataBaseClass(QObject* parent)
 	: QObject(parent)
 {
 	AttachConsole(ATTACH_PARENT_PROCESS);
@@ -9,13 +9,13 @@ dataBaseCLass::dataBaseCLass(QObject* parent)
 
 
 
-dataBaseCLass::~dataBaseCLass()
+dataBaseClass::~dataBaseClass()
 {
 }
 
 
 
-void dataBaseCLass::connectDataBase()
+void dataBaseClass::connectDataBase()
 {
 	qDebug() << "Drivers: " << QSqlDatabase::drivers();
 	qDebug() << "LibraryDriverPath: " << QCoreApplication::libraryPaths();
@@ -37,7 +37,7 @@ void dataBaseCLass::connectDataBase()
 
 
 
-void dataBaseCLass::getDeviceParams()
+void dataBaseClass::getDeviceParams()
 {
 	connectDataBase();
 
@@ -88,9 +88,9 @@ ORDER BY 4 DESC -- Сортировка по 4-й колонке (Отклонение времени в секундах)
 	if (!query.exec(queryString) || !query.next())
 	{
 		if (query.lastError().isValid())
-			qDebug() << "Error in dataBaseCLass::getDeviceParams() when try to get all device with time diff" << '\n' << "Error: " << query.lastError().text();
+			qDebug() << "Error in dataBaseClass::getDeviceParams() when try to get all device with time diff" << '\n' << "Error: " << query.lastError().text();
 		else
-			qDebug() << "dataBaseCLass::getDeviceParams() is no get devices with diff";
+			qDebug() << "dataBaseClass::getDeviceParams() is no get devices with diff";
 	}
 	else
 	{
@@ -109,7 +109,7 @@ ORDER BY 4 DESC -- Сортировка по 4-й колонке (Отклонение времени в секундах)
 
 
 
-QString dataBaseCLass::removeSimbols(QString temp)
+QString dataBaseClass::removeSimbols(QString temp)
 {
 	temp.remove("\r");
 	temp.remove("\n");
@@ -119,7 +119,7 @@ QString dataBaseCLass::removeSimbols(QString temp)
 
 
 
-bool dataBaseCLass::readDataBaseFile()
+bool dataBaseClass::readDataBaseFile()
 {
 	QFile file(QCoreApplication::applicationDirPath() + "\\dataBase.txt");
 

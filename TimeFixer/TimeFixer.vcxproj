@@ -78,7 +78,7 @@
     <QtMoc Include="listClassForHosts.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="dataBaseCLass.h" />
+    <QtMoc Include="dataBaseClass.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="hostsFromDataBase.h" />

@@ -16,7 +16,7 @@ hostsFromDataBase::~hostsFromDataBase()
 
 void hostsFromDataBase::clearAllArr()
 {
-	qDebug() << "\n\n\nClear all arrays with old client\n\n\n";
+	qDebug() << "\n\n\nClear all arrays with old client for DataBase hosts\n\n\n";
 	hostsArr.clear();
 	clienArrM2M.clear();
 	clientArrART.clear();

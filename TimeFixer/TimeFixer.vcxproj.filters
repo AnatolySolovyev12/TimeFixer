@@ -58,7 +58,7 @@
     <QtMoc Include="listClassForHosts.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="dataBaseCLass.h">
+    <QtMoc Include="dataBaseClass.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="hostsFromDataBase.h">

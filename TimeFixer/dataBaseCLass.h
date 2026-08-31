@@ -9,13 +9,13 @@
 #include <Windows.h>
 #include <QFile>
 
-class dataBaseCLass  : public QObject
+class dataBaseClass  : public QObject
 {
 	Q_OBJECT
 
 public:
-	dataBaseCLass(QObject *parent);
-	~dataBaseCLass();
+	dataBaseClass(QObject *parent);
+	~dataBaseClass();
 
 	void connectDataBase();
 	void getDeviceParams();

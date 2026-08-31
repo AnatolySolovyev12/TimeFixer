@@ -74,6 +74,10 @@ void listClassForHosts::initializeFunc()
 {
 	host = new TcpClientArt();
 
+	restartTimer = new QTimer();
+
+	connect(restartTimer, &QTimer::timeout, this, &listClassForHosts::returnTimeToNextCycle);
+
 	connect(host, &TcpClientArt::finishART, this, [this]() {
 
 		++counterHost;
@@ -90,16 +94,8 @@ void listClassForHosts::switchToNextHost()
 {
 	if (counterHost >= hostArr.length() || hostArr[counterHost].first == "" || hostArr[counterHost].second == "")
 	{
-		QTimer::singleShot(20000000, [this]() // 86400000 - сутки, 21600000 - 6 часов
-			{
-				counterHost = 0;
-				qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
-				host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
-				timeToNextCycle = QTime::currentTime().addSecs(20000000 / 1000).toString();
-			});
-
+		restartTimer->start(20000000); // 86400000 - сутки, 21600000 - 6 часов
 		timeToNextCycle = QTime::currentTime().addSecs(20000000 / 1000).toString();
-
 		return;
 	}
 	else
@@ -115,4 +111,15 @@ void listClassForHosts::switchToNextHost()
 QString listClassForHosts::returnTimeToNextCycle()
 {
 	return timeToNextCycle;
+}
+
+
+
+void listClassForHosts::restartCycleFunc()
+{
+	restartTimer->stop();
+	counterHost = 0;
+	qDebug() << "\n\n\n" << "Restart All Session and start new session (" + QString::number(counterHost + 1) + '/' + QString::number(hostArr.length()) + "): " << hostArr[counterHost].first << "   " << hostArr[counterHost].second;
+	host->startConnectToHost(hostArr[counterHost].first, hostArr[counterHost].second);
+	timeToNextCycle = QTime::currentTime().addSecs(20000000 / 1000).toString();
 }
