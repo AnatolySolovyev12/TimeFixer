@@ -97,7 +97,8 @@ ORDER BY 4 DESC -- Сортировка по 4-й колонке (Отклонение времени в секундах)
 		do
 		{
 			//qDebug() << query.value(0).toString() << query.value(1).toString() << query.value(2).toString() << query.value(3).toString() << query.value(4).toString() << query.value(5).toString() << query.value(6).toString();
-			emit deviceParams(removeSimbols(query.value(0).toString()), removeSimbols(query.value(1).toString()), removeSimbols(query.value(2).toString()), removeSimbols(query.value(3).toString()), removeSimbols(query.value(4).toString()), removeSimbols(query.value(5).toString()), removeSimbols(query.value(6).toString()));
+			emit deviceParams(removeSimbols(query.value(0).toString()), removeSimbols(query.value(1).toString()), removeSimbols(query.value(2).toString()), removeSimbols(query.value(3).toString()), 
+				removeSimbols(query.value(4).toString()), removeSimbols(query.value(5).toString()), removeSimbols(query.value(6).toString()));
 		} while (query.next());
 	}
 

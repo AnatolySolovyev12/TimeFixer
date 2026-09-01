@@ -59,7 +59,7 @@ void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD,
 
 void hostsFromDataBase::showArray()
 {
-	qDebug() << "Count of hosts: " << hostsArr.length() << '\n';
+	qDebug() << "Count of hosts in dataBaseClass: " << hostsArr.length() << '\n';
 
 	int counter = 1;
 

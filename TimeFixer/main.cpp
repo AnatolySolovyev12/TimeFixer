@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 	QObject::connect(restoreActionHideCLI, &QAction::triggered, &cmdClose);
 	QObject::connect(restoreActionRestartDbHosts, &QAction::triggered, &resetTimerForDbHosts);
 	QObject::connect(restoreActionRestartListHosts, &QAction::triggered, &resetTimerForListHosts);
-	QObject::connect(restoreSetMaxSecondsM2M, &QAction::triggered,[]() {setMaxSecondsM2M();});
+	QObject::connect(restoreSetMaxSecondsM2M, &QAction::triggered,[]() { setMaxSecondsM2M(); });
 	QObject::connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
 	QObject::connect(trayIcon, &QSystemTrayIcon::activated, &iconActivated);
 	
