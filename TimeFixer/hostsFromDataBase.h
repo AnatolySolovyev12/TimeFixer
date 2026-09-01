@@ -21,6 +21,9 @@ public:
 	hostsFromDataBase(QObject* parent);
 	~hostsFromDataBase();
 
+	void setMaxSeconds(int value);
+
+
 	struct HostStruct
 	{
 		QString s_name;
@@ -41,6 +44,7 @@ private:
 
 	QList<HostStruct>hostsArr;
 	QList<TcpClientM2M*>clienArrM2M;
+	int maxSeconds = 320000;
 	QList<TcpClientArt*>clientArrART;
 	QList<TcpClientMIR*>clientArrMIR;
 	QList<TcpClientMercury*>clientArrMercury;

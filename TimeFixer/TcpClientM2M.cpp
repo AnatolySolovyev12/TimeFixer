@@ -350,3 +350,10 @@ void TcpClientM2M::checkDateTimeFromDevice(QString rxString)
 	else
 		codeForCorrect = 9;
 }
+
+
+
+void TcpClientM2M::setMaxSeconds(int value)
+{
+	maxSeconds = value;
+}

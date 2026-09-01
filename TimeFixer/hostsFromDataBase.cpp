@@ -105,6 +105,7 @@ void hostsFromDataBase::makeClients()
 			|| val.s_serial.contains("109000") && val.s_softVer.contains("2."))
 		{
 			TcpClientM2M* temp = new TcpClientM2M();
+			temp->setMaxSeconds(maxSeconds);
 
 			connect(temp, &TcpClientM2M::finishM2M, [temp]() {
 				if (temp != nullptr)
@@ -196,4 +197,11 @@ void hostsFromDataBase::makeClients()
 			temp->startConnectToHost(ipFromDbTelegram, portFromDbTelegram);
 		}
 	}
+}
+
+
+
+void hostsFromDataBase::setMaxSeconds(int value)
+{
+	maxSeconds = value;
 }

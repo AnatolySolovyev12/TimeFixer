@@ -28,6 +28,7 @@ public:
 	void changeTimeM2M();
 	void exchangeFromTimer();
 	void checkDateTimeFromDevice(QString rxString);
+	void setMaxSeconds(int value);
 
 
 signals:
@@ -53,4 +54,5 @@ private:
 	int reConnectCounter = 0;
 	int typeDifferent = 0; // 0 - -900    1 - +900   2 - -213   3 - +228   4 - -51   5 - +38     9 - too much
 	int codeForCorrect = 9;
+	int maxSeconds = 320000;
 };
