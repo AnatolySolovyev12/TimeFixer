@@ -32,7 +32,7 @@
     <ClCompile Include="listClassForHosts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dataBaseCLass.cpp">
+    <ClCompile Include="dataBaseClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hostsFromDataBase.cpp">

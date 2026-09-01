@@ -58,7 +58,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="dataBaseCLass.cpp" />
+    <ClCompile Include="dataBaseClass.cpp" />
     <ClCompile Include="hostsFromDataBase.cpp" />
     <ClCompile Include="listClassForHosts.cpp" />
     <ClCompile Include="main.cpp" />
