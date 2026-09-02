@@ -39,10 +39,10 @@ void hostsFromDataBase::pushHostInArr(QString name, QString ipPort, QString CSD,
 
 		|| name.contains("МИР") || name.contains("С-04") || name.contains("С-05") || name.contains("С-07") || name.contains("C-04") || name.contains("C-05") 
 		|| name.contains("C-07") || name.contains("481687") || name.contains("478212") || name.contains("464363") || name.contains("479687") || name.contains("494591")
-		|| name.contains("464365") || name.contains("465114")
+		|| name.contains("464365") || name.contains("465114") || name.contains("483827")
 
 		|| serial.contains("481687") || serial.contains("478212") || serial.contains("464363") || serial.contains("479687") || serial.contains("494591")
-		|| serial.contains("464365") || serial.contains("465114")
+		|| serial.contains("464365") || serial.contains("465114") || serial.contains("483827")
 
 		|| name.contains("Меркурий") || name.contains("М204") || name.contains("M204") || name.contains("М203") || name.contains("M203") || name.contains("M-234") || name.contains("М-234")
 			
@@ -141,9 +141,9 @@ void hostsFromDataBase::makeClients()
 
 		if(val.s_name.contains("МИР") || val.s_name.contains("С-04") || val.s_name.contains("С-05") || val.s_name.contains("С-07") || val.s_name.contains("C-04") || val.s_name.contains("C-05") 
 			|| val.s_name.contains("C-07") || val.s_name.contains("481687") || val.s_name.contains("478212") || val.s_name.contains("464363") || val.s_name.contains("479687") || val.s_name.contains("494591")
-			|| val.s_name.contains("464365") || val.s_name.contains("465114")
+			|| val.s_name.contains("464365") || val.s_name.contains("465114") || val.s_name.contains("483827")
 			|| val.s_serial.contains("481687") || val.s_serial.contains("478212") || val.s_serial.contains("464363") || val.s_serial.contains("479687") || val.s_serial.contains("494591")
-			|| val.s_serial.contains("464365") || val.s_serial.contains("465114"))
+			|| val.s_serial.contains("464365") || val.s_serial.contains("465114") || val.s_serial.contains("483827"))
 		{
 			TcpClientMIR* temp = new TcpClientMIR();
 
